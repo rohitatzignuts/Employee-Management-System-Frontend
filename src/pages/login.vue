@@ -1,0 +1,148 @@
+<script setup lang="ts">
+import { VForm } from 'vuetify/components/VForm'
+import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
+import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
+import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
+import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
+import authV2LoginIllustrationLight from '@images/pages/auth-v2-login-illustration-light.png'
+import authV2MaskDark from '@images/pages/misc-mask-dark.png'
+import authV2MaskLight from '@images/pages/misc-mask-light.png'
+import axios from 'axios'
+import router from '@/router'
+
+const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
+
+const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
+
+const isPasswordVisible = ref(false)
+
+const refVForm = ref<VForm>()
+const loginData = ref({
+  email: '',
+  password: '',
+})
+const handleLogin = async () => {
+  try {
+    const respone = await axios.post('http://127.0.0.1:8000/api/login',loginData.value)
+    if(respone.data && respone.data.access_token){
+      localStorage.setItem("access_token", respone.data.access_token);
+      router.push({ path: "/" });
+      loginData.value.email = "";
+      loginData.value.password = "";
+    }
+  } catch (error : any) {
+    console.log(error);
+  }
+}
+</script>
+
+<template>
+  <VRow
+    no-gutters
+    class="auth-wrapper bg-surface"
+  >
+    <VCol
+      lg="8"
+      class="d-none d-lg-flex"
+    >
+      <div class="position-relative bg-background rounded-lg w-100 ma-8 me-0">
+        <div class="d-flex align-center justify-center w-100 h-100">
+          <VImg
+            max-width="505"
+            :src="authThemeImg"
+            class="auth-illustration mt-16 mb-2"
+          />
+        </div>
+
+        <VImg
+          :src="authThemeMask"
+          class="auth-footer-mask"
+        />
+      </div>
+    </VCol>
+
+    <VCol
+      cols="12"
+      lg="4"
+      class="auth-card-v2 d-flex align-center justify-center"
+    >
+      <VCard
+        flat
+        :max-width="500"
+        class="mt-12 mt-sm-0 pa-4"
+      >
+        <VCardText>
+          <h5 class="text-h5 mb-1">
+            Welcome ! 👋🏻
+          </h5>
+
+          <p class="mb-0">
+            Please sign-in to your account...
+          </p>
+        </VCardText>
+
+        <VCardText>
+          <VForm
+            ref="refVForm"
+            @submit.prevent="handleLogin"
+          >
+            <VRow>
+              <!-- email -->
+              <VCol cols="12">
+                <AppTextField
+                  v-model="loginData.email"
+                  label="Email"
+                  type="email"
+                  autofocus
+                />
+              </VCol>
+
+              <!-- password -->
+              <VCol cols="12">
+                <AppTextField
+                  v-model="loginData.password"
+                  label="Password"
+                  :type="isPasswordVisible ? 'text' : 'password'"
+                  :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
+                  @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                />
+
+                <VBtn
+                  block
+                  type="submit"
+                  class="mt-8"
+                >
+                  Login
+                </VBtn>
+              </VCol>
+
+              <!-- create account -->
+              <VCol
+                cols="12"
+                class="text-center"
+              >
+                <span>New on our platform?</span>
+
+                <a
+                  class="text-primary ms-2"
+                  href="#"
+                >
+                  Create an account
+                </a>
+              </VCol>
+            </VRow>
+          </VForm>
+        </VCardText>
+      </VCard>
+    </VCol>
+  </VRow>
+</template>
+
+<style lang="scss">
+@use "@core/scss/template/pages/page-auth.scss";
+</style>
+
+<route lang="yaml">
+meta:
+  layout: blank
+</route>
