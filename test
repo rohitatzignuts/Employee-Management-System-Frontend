@@ -1,0 +1,40 @@
+const onSubmit = async () => {
+  const access_token = localStorage.getItem("access_token");
+  if (access_token) {
+    if (!isFormValid.value) {
+      return; // Don't submit if the form is not valid
+    }
+    try {
+        const formData = new FormData();
+        formData.append('name', companyData.value.name);
+        formData.append('logo', companyData.value.logo[0]); 
+        formData.append('website', companyData.value.website);
+        formData.append('cmp_email', companyData.value.cmp_email);
+        formData.append('location', companyData.value.location);
+        formData.append('cmp_admin_first_name', companyData.value.cmp_admin_first_name);
+        formData.append('cmp_admin_last_name', companyData.value.cmp_admin_last_name);
+        formData.append('cmp_admin_email', companyData.value.cmp_admin_email);
+        formData.append('cmp_admin_password', companyData.value.cmp_admin_password);
+
+        let method = companyData.value ? 'put' : 'post';
+        const url = companyId ? `http://127.0.0.1:8000/api/company/update/${companyId}` : `http://127.0.0.1:8000/api/company/create`
+        axios[method](url,companyData.value,{
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+                'content-type': 'multipart/form-data'
+            }
+        })
+        if (response.data.status == "200") {
+            console.log(response.data.message);
+            closeNavigationDrawer()
+          } else {
+            console.log(response.data.message);
+          }
+    } catch (error) {
+        
+    }finally{
+        refForm.value?.reset()
+        refForm.value?.resetValidation()
+    }
+  }
+};
