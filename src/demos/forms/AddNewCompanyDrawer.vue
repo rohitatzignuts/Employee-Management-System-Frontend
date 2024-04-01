@@ -20,7 +20,7 @@ const emit = defineEmits<Emit>()
 
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
-const getCompanyId = ref<string | number>()
+const getCompanyId = ref<string | number | null>()
 
 const companyData = ref({
   'name': '',
@@ -34,6 +34,15 @@ const companyData = ref({
   'cmp_admin_password': '',
   'cmp_admin_joining_date': '',
   'emp_number': 0,  
+})
+
+const cmpAdminData = ref({
+  'cmp_admin_first_name': '',
+  'cmp_admin_last_name': '',
+  'cmp_admin_email': '',
+  'cmp_admin_password': '',
+  'cmp_admin_joining_date': '',
+  'emp_number': 0, 
 })
 
 // 👉 drawer close
@@ -58,7 +67,12 @@ const getCompanyData = async () => {
           'content-type': 'multipart/form-data'
         }
       })
-      companyData.value = response.data
+      companyData.value = response.data.company;
+      cmpAdminData.value.cmp_admin_first_name = response.data.employee.user.first_name
+      cmpAdminData.value.cmp_admin_last_name = response.data.employee.user.last_name
+      cmpAdminData.value.cmp_admin_joining_date = response.data.employee.joining_date
+      cmpAdminData.value.cmp_admin_email = response.data.employee.user.email
+      cmpAdminData.value.emp_number = response.data.employee.emp_number      
     } catch (error) {
       console.error("Error submitting data:", error);
     }finally{
@@ -79,16 +93,15 @@ const onSubmit = async () => {
       formData.append('website', companyData.value.website);
       formData.append('cmp_email', companyData.value.cmp_email);
       formData.append('location', companyData.value.location);
-      formData.append('cmp_admin_first_name', companyData.value.cmp_admin_first_name);
-      formData.append('cmp_admin_last_name', companyData.value.cmp_admin_last_name);
-      formData.append('cmp_admin_email', companyData.value.cmp_admin_email);
-      formData.append('cmp_admin_password', companyData.value.cmp_admin_password);
-      formData.append('cmp_admin_joining_date', companyData.value.cmp_admin_joining_date);
-      formData.append('emp_number',String(companyData.value.emp_number));
+      formData.append('cmp_admin_first_name', cmpAdminData.value.cmp_admin_first_name);
+      formData.append('cmp_admin_last_name', cmpAdminData.value.cmp_admin_last_name);
+      formData.append('cmp_admin_email', cmpAdminData.value.cmp_admin_email);
+      formData.append('cmp_admin_password', cmpAdminData.value.cmp_admin_password);
+      formData.append('cmp_admin_joining_date', cmpAdminData.value.cmp_admin_joining_date);
+      formData.append('emp_number',String(cmpAdminData.value.emp_number));
 
-      let method = props.companyId ? 'put' : 'post'; // Assuming companyId is defined
+      let method = props.companyId ? 'put' : 'post';
       const url = props.companyId ? `http://127.0.0.1:8000/api/company/update/${props.companyId}` : `http://127.0.0.1:8000/api/company/create`;
-      
       const response = await axios[method](url, formData, {
         headers: {
           Authorization: `Bearer ${access_token}`,
@@ -99,6 +112,7 @@ const onSubmit = async () => {
       if (response.data.status == "200") {
         console.log(response.data.message);
         closeNavigationDrawer();
+        getCompanyId.value = null
       } else {
         console.log(response.data.message);
       }
@@ -168,37 +182,37 @@ watch(() => props.companyId, (newId, oldId) => {
 
               <!-- 👉 Company Admin First Name -->
               <VCol cols="12">
-                <AppTextField v-model="companyData.cmp_admin_first_name" :rules="[requiredValidator]"
+                <AppTextField v-model="cmpAdminData.cmp_admin_first_name" :rules="[requiredValidator]"
                   label="Company Admin First Name" />
               </VCol>
 
               <!-- 👉 Company Admin last Name -->
               <VCol cols="12">
-                <AppTextField v-model="companyData.cmp_admin_last_name" :rules="[requiredValidator]"
+                <AppTextField v-model="cmpAdminData.cmp_admin_last_name" :rules="[requiredValidator]"
                   label="Company Admin Last Name" />
               </VCol>
 
               <!-- 👉 Company Admin Email -->
               <VCol cols="12">
-                <AppTextField v-model="companyData.cmp_admin_email" type="email"
+                <AppTextField v-model="cmpAdminData.cmp_admin_email" type="email"
                   :rules="[requiredValidator, emailValidator]" label="Company Admin Email" />
               </VCol>
 
               <!-- 👉 Company Admin Joining Date -->
               <VCol cols="12">
-                <AppTextField v-model="companyData.cmp_admin_joining_date" type="date"
+                <AppTextField v-model="cmpAdminData.cmp_admin_joining_date" type="date"
                   :rules="[requiredValidator]" label="Company Admin Joining Date" />
               </VCol>
 
               <!-- 👉 Company Admin Emp Number -->
               <VCol cols="12">
-                <AppTextField v-model="companyData.emp_number" type="number"
+                <AppTextField v-model="cmpAdminData.emp_number" type="number"
                   :rules="[requiredValidator]" label="Company Admin Employee Number" />
               </VCol>
 
               <!-- 👉 Company Admin password -->
-              <VCol cols="12">
-                <AppTextField v-model="companyData.cmp_admin_password" type="password" :rules="[requiredValidator]"
+              <VCol cols="12" v-if="!props.companyId">
+                <AppTextField v-model="cmpAdminData.cmp_admin_password" type="password" :rules="[requiredValidator]"
                   label="Company Admin password" />
               </VCol>
 
