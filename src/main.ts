@@ -9,13 +9,19 @@ import '@core/scss/template/index.scss'
 import '@styles/styles.scss'
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
-
+import VueSweetalert2 from 'vue-sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 loadFonts()
 
+const options = {
+    confirmButtonColor: '#7367F0',
+    cancelButtonColor: '#D0D4F1SD',
+};
 // Create vue app
 const app = createApp(App)
 
 // Use plugins
+app.use(VueSweetalert2,options);
 app.use(vuetify)
 app.use(createPinia())
 app.use(router)

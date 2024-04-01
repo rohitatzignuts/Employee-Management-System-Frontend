@@ -5,6 +5,7 @@ import type { VForm } from 'vuetify/components/VForm'
 import axios from 'axios';
 import { emailValidator, requiredValidator } from '../../@core/utils/validators'
 import { ref, nextTick } from 'vue';
+import { log } from 'console';
 
 interface Emit {
   (e: 'update:isDrawerOpen', value: Boolean): void
@@ -82,27 +83,30 @@ const getCompanyData = async () => {
 }
 
 // 👉 edit existig company and create a new company
+// 👉 edit existing company and create a new company
 const onSubmit = async () => {
-  const access_token = localStorage.getItem("access_token");
+  const access_token = localStorage.getItem("access_token")
   if (access_token) {
-
     try {
-      const formData = new FormData();
-      formData.append('name', companyData.value.name);
-      formData.append('logo', companyData.value.logo[0]); 
-      formData.append('website', companyData.value.website);
-      formData.append('cmp_email', companyData.value.cmp_email);
-      formData.append('location', companyData.value.location);
-      formData.append('cmp_admin_first_name', cmpAdminData.value.cmp_admin_first_name);
-      formData.append('cmp_admin_last_name', cmpAdminData.value.cmp_admin_last_name);
-      formData.append('cmp_admin_email', cmpAdminData.value.cmp_admin_email);
-      formData.append('cmp_admin_password', cmpAdminData.value.cmp_admin_password);
-      formData.append('cmp_admin_joining_date', cmpAdminData.value.cmp_admin_joining_date);
-      formData.append('emp_number',String(cmpAdminData.value.emp_number));
+      const formData = new FormData()
+      formData.append('logo', companyData.value.logo[0]);
+      let input = {
+        'logo' : companyData.value.logo[0],
+        'name': companyData.value.name,
+        'website': companyData.value.website,
+        'cmp_email' : companyData.value.cmp_email,
+        'location': companyData.value.location,
+        'cmp_admin_first_name': cmpAdminData.value.cmp_admin_first_name,
+        'cmp_admin_last_name': cmpAdminData.value.cmp_admin_last_name,
+        'cmp_admin_email': cmpAdminData.value.cmp_admin_email,
+        'cmp_admin_password': cmpAdminData.value.cmp_admin_password,
+        'cmp_admin_joining_date': cmpAdminData.value.cmp_admin_joining_date,
+        'emp_number': String(cmpAdminData.value.emp_number),
+      }
+      
 
-      let method = props.companyId ? 'put' : 'post';
-      const url = props.companyId ? `http://127.0.0.1:8000/api/company/update/${props.companyId}` : `http://127.0.0.1:8000/api/company/create`;
-      const response = await axios[method](url, formData, {
+      const url = props.companyId ? `http://127.0.0.1:8000/api/company/update/${props.companyId}` : `http://127.0.0.1:8000/api/company/create`
+      const response = await axios.post(url, input, {
         headers: {
           Authorization: `Bearer ${access_token}`,
           'content-type': 'multipart/form-data'
@@ -110,20 +114,21 @@ const onSubmit = async () => {
       });
 
       if (response.data.status == "200") {
-        console.log(response.data.message);
-        closeNavigationDrawer();
+        console.log(response.data.message)
+        closeNavigationDrawer()
         getCompanyId.value = null
       } else {
-        console.log(response.data.message);
+        console.log(response.data.message)
       }
     } catch (error) {
-      console.error("Error submitting data:", error);
+      console.error("Error submitting data:", error)
     } finally {
       refForm.value?.reset();
-      refForm.value?.resetValidation();
+      refForm.value?.resetValidation()
     }
   }
 };
+
 
 const handleDrawerModelValueUpdate = (val: boolean) => {
   emit('update:isDrawerOpen', val)
