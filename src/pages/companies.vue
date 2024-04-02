@@ -16,6 +16,7 @@ const headers = [
   { title: 'NAME', key: 'name' },
   { title: 'EMAIL', key: 'cmp_email' },
   { title: 'LOCATION', key: 'location' },
+  { title: 'ISACTIVE', key: 'is_active' },
   { title: 'Actions', key: 'actions' },
 ]
 
@@ -87,6 +88,17 @@ watchEffect(() => {
       </div>
       <VDivider class="my-4" />
       <VDataTable :headers="headers" :items="companies" :items-per-page="10" class="pa-3">
+        <template #item.is_active="{ item }">
+          <div>
+            <VChip color="success" v-if="item.props.title.is_active === 1">
+              active
+            </VChip>
+
+            <VChip color="secondary" v-else>
+              closed
+            </VChip>
+          </div>
+        </template>
         <template #item.actions="{ item }">
           <div class="d-flex gap-1">
             <IconBtn @click="handleEditCompany(item.props.title.id)">

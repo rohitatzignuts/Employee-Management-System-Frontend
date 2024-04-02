@@ -5,7 +5,6 @@ import type { VForm } from 'vuetify/components/VForm'
 import axios from 'axios';
 import { emailValidator, requiredValidator } from '../../@core/utils/validators'
 import { ref, nextTick } from 'vue';
-import { log } from 'console';
 
 interface Emit {
   (e: 'update:isDrawerOpen', value: Boolean): void
@@ -13,15 +12,16 @@ interface Emit {
 
 interface Props {
   isDrawerOpen: boolean
-  companyId ?: string|number
+  companyId?: string | number
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
-
+const isEditing = ref<Boolean>(false)
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
-const getCompanyId = ref<string | number | null>()
+const getCompanyId = ref<string | number | null>(props.companyId ?? null)
+let companyStatus = ref(1)
 
 const companyData = ref({
   'name': '',
@@ -29,12 +29,7 @@ const companyData = ref({
   'website': '',
   'cmp_email': '',
   'location': '',
-  'cmp_admin_first_name': '',
-  'cmp_admin_last_name': '',
-  'cmp_admin_email': '',
-  'cmp_admin_password': '',
-  'cmp_admin_joining_date': '',
-  'emp_number': 0,  
+  'is_active' : companyStatus.value
 })
 
 const cmpAdminData = ref({
@@ -43,7 +38,6 @@ const cmpAdminData = ref({
   'cmp_admin_email': '',
   'cmp_admin_password': '',
   'cmp_admin_joining_date': '',
-  'emp_number': 0, 
 })
 
 // 👉 drawer close
@@ -58,11 +52,12 @@ const closeNavigationDrawer = () => {
 
 // 👉 get the company data on the basis of ID
 const getCompanyData = async () => {
-  if(props.companyId){
+  if (props.companyId) {
+    isEditing.value = true
     getCompanyId.value = props.companyId
     try {
       const access_token = localStorage.getItem("access_token");
-      const response = await axios.get(`http://127.0.0.1:8000/api/company/${getCompanyId.value}}`,{
+      const response = await axios.get(`http://127.0.0.1:8000/api/company/${getCompanyId.value}}`, {
         headers: {
           Authorization: `Bearer ${access_token}`,
           'content-type': 'multipart/form-data'
@@ -73,17 +68,14 @@ const getCompanyData = async () => {
       cmpAdminData.value.cmp_admin_last_name = response.data.employee.user.last_name
       cmpAdminData.value.cmp_admin_joining_date = response.data.employee.joining_date
       cmpAdminData.value.cmp_admin_email = response.data.employee.user.email
-      cmpAdminData.value.emp_number = response.data.employee.emp_number      
+      getCompanyId.value = null
     } catch (error) {
       console.error("Error submitting data:", error);
-    }finally{
-      getCompanyId.value = ''
     }
   }
 }
 
 // 👉 edit existig company and create a new company
-// 👉 edit existing company and create a new company
 const onSubmit = async () => {
   const access_token = localStorage.getItem("access_token")
   if (access_token) {
@@ -91,20 +83,19 @@ const onSubmit = async () => {
       const formData = new FormData()
       formData.append('logo', companyData.value.logo[0]);
       let input = {
-        'logo' : companyData.value.logo[0],
+        'logo': companyData.value.logo[0],
         'name': companyData.value.name,
         'website': companyData.value.website,
-        'cmp_email' : companyData.value.cmp_email,
+        'cmp_email': companyData.value.cmp_email,
         'location': companyData.value.location,
+        'is_active' : companyData.value.is_active,
         'cmp_admin_first_name': cmpAdminData.value.cmp_admin_first_name,
         'cmp_admin_last_name': cmpAdminData.value.cmp_admin_last_name,
         'cmp_admin_email': cmpAdminData.value.cmp_admin_email,
         'cmp_admin_password': cmpAdminData.value.cmp_admin_password,
         'cmp_admin_joining_date': cmpAdminData.value.cmp_admin_joining_date,
-        'emp_number': String(cmpAdminData.value.emp_number),
       }
-      
-
+      isEditing.value = props.companyId ? true : false
       const url = props.companyId ? `http://127.0.0.1:8000/api/company/update/${props.companyId}` : `http://127.0.0.1:8000/api/company/create`
       const response = await axios.post(url, input, {
         headers: {
@@ -112,50 +103,50 @@ const onSubmit = async () => {
           'content-type': 'multipart/form-data'
         }
       });
-
       if (response.data.status == "200") {
-        console.log(response.data.message)
         closeNavigationDrawer()
+        console.log(response.data.message)
         getCompanyId.value = null
+        isEditing.value = false
       } else {
         console.log(response.data.message)
       }
     } catch (error) {
       console.error("Error submitting data:", error)
-    } finally {
-      refForm.value?.reset();
-      refForm.value?.resetValidation()
-    }
+    } 
   }
 };
 
-
 const handleDrawerModelValueUpdate = (val: boolean) => {
   emit('update:isDrawerOpen', val)
+}
+
+const handleCompanyStatus = () => {
+  companyStatus.value = companyStatus.value === 1 ? 0 : 1;
+  companyData.value.is_active = companyStatus.value;
 }
 
 onMounted(() => {
   getCompanyData();
 });
 
-watch(() => props.companyId, (newId, oldId) => {
+watch(() => props.companyId ?? null, (newId, oldId) => {
   getCompanyId.value = newId;
   getCompanyData()
 });
 </script>
 
-
 <template>
   <VNavigationDrawer temporary :width="400" location="end" class="scrollable-content" :model-value="props.isDrawerOpen"
     @update:model-value="handleDrawerModelValueUpdate">
     <!-- 👉 Title -->
-    <AppDrawerHeaderSection :title=" props.companyId  ? 'Edit Company' : 'Add Company' " @cancel="closeNavigationDrawer" />
+    <AppDrawerHeaderSection :title="isEditing ? 'Edit Company' : 'Add Company'" @cancel="closeNavigationDrawer" />
 
     <PerfectScrollbar :options="{ wheelPropagation: false }">
       <VCard flat>
         <VCardText>
           <!-- 👉 Form -->
-          <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit" enctype="multipart/form-data" >
+          <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit" enctype="multipart/form-data">
             <VRow>
               <!-- 👉 Company Name -->
               <VCol cols="12">
@@ -180,7 +171,7 @@ watch(() => props.companyId, (newId, oldId) => {
 
               <!-- 👉 Logo -->
               <VCol cols="12" v-if="!props.companyId">
-                <VFileInput v-model="companyData.logo" label="Company Logo" prepend-icon="mdi-camera"/>
+                <VFileInput v-model="companyData.logo" label="Company Logo" prepend-icon="mdi-camera" />
               </VCol>
 
               <VDivider class="my-4" />
@@ -205,14 +196,8 @@ watch(() => props.companyId, (newId, oldId) => {
 
               <!-- 👉 Company Admin Joining Date -->
               <VCol cols="12">
-                <AppTextField v-model="cmpAdminData.cmp_admin_joining_date" type="date"
-                  :rules="[requiredValidator]" label="Company Admin Joining Date" />
-              </VCol>
-
-              <!-- 👉 Company Admin Emp Number -->
-              <VCol cols="12">
-                <AppTextField v-model="cmpAdminData.emp_number" type="number"
-                  :rules="[requiredValidator]" label="Company Admin Employee Number" />
+                <AppTextField v-model="cmpAdminData.cmp_admin_joining_date" type="date" :rules="[requiredValidator]"
+                  label="Company Admin Joining Date" />
               </VCol>
 
               <!-- 👉 Company Admin password -->
@@ -221,20 +206,15 @@ watch(() => props.companyId, (newId, oldId) => {
                   label="Company Admin password" />
               </VCol>
 
-              <!-- 👉 Status
-              <VCol cols="12">
-                <AppSelect
-                  v-model="status"
-                  label="Select Status"
-                  :rules="[requiredValidator]"
-                  :items="[{ title: 'Active', value: 'active' }, { title: 'Inactive', value: 'inactive' }, { title: 'Pending', value: 'pending' }]"
-                />
-              </VCol> -->
+              <!-- 👉 Company Status -->
+              <VCol cols="12" v-if="props.companyId">
+                <VSwitch label="closed" v-model="companyStatus" @click="handleCompanyStatus"/>
+              </VCol>
 
               <!-- 👉 Submit and Cancel -->
               <VCol cols="12">
                 <VBtn type="submit" class="me-3">
-                  {{ props.companyId ? `Edit` : `Create`}}
+                  {{ isEditing ? `Edit` : `Create` }}
                 </VBtn>
                 <VBtn type="reset" variant="tonal" color="secondary" @click="closeNavigationDrawer">
                   Cancel

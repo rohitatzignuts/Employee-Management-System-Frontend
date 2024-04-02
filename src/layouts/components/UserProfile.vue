@@ -1,5 +1,36 @@
 <script setup lang="ts">
-import avatar1 from '@images/avatars/avatar-1.png'
+import axios from 'axios';
+import Swal from 'sweetalert2/dist/sweetalert2.js'
+import { useRouter } from 'vue-router';
+
+const router = useRouter()
+const handleLogout = async () => {
+  const accessToken = localStorage.getItem('access_token')
+  try {
+    const response = await axios.post(
+      'http://127.0.0.1:8000/api/logout',
+      null, // No data to send in the request body
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    )
+    if (response.status === 200) {
+      router.push('/login')
+      localStorage.removeItem('access_token')
+      Swal.fire({
+        title: 'Logged Out Successfully!',
+        icon: 'success',
+        showConfirmButton : false,
+        timer: 500
+      })
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 </script>
 
 <template>
@@ -111,7 +142,7 @@ import avatar1 from '@images/avatars/avatar-1.png'
           <VDivider class="my-2" />
 
           <!-- 👉 Logout -->
-          <VListItem to="/login">
+          <VListItem @click="handleLogout">
             <template #prepend>
               <VIcon
                 class="me-2"
