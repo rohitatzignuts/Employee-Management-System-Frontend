@@ -90,7 +90,7 @@ watchEffect(() => {
       <VDataTable :headers="headers" :items="companies" :items-per-page="10" class="pa-3">
         <template #item.is_active="{ item }">
           <div>
-            <VChip color="success" v-if="item.props.title.is_active === 1">
+            <VChip color="success" v-if="item.props.title.is_active == true">
               active
             </VChip>
 

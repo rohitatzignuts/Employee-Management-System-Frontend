@@ -17,11 +17,11 @@ interface Props {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
+
 const isEditing = ref<Boolean>(false)
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const getCompanyId = ref<string | number | null>(props.companyId ?? null)
-let companyStatus = ref(1)
 
 const companyData = ref({
   'name': '',
@@ -29,7 +29,7 @@ const companyData = ref({
   'website': '',
   'cmp_email': '',
   'location': '',
-  'is_active' : companyStatus.value
+  'is_active' : true
 })
 
 const cmpAdminData = ref({
@@ -121,11 +121,6 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
   emit('update:isDrawerOpen', val)
 }
 
-const handleCompanyStatus = () => {
-  companyStatus.value = companyStatus.value === 1 ? 0 : 1;
-  companyData.value.is_active = companyStatus.value;
-}
-
 onMounted(() => {
   getCompanyData();
 });
@@ -208,7 +203,7 @@ watch(() => props.companyId ?? null, (newId, oldId) => {
 
               <!-- 👉 Company Status -->
               <VCol cols="12" v-if="props.companyId">
-                <VSwitch label="closed" v-model="companyStatus" @click="handleCompanyStatus"/>
+                <VSwitch label="closed" v-model="companyData.is_active" @click="!companyData.is_active"/>
               </VCol>
 
               <!-- 👉 Submit and Cancel -->
