@@ -4,10 +4,10 @@ import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import type { VForm } from 'vuetify/components/VForm'
 import axios from 'axios';
 import { emailValidator, requiredValidator } from '../../@core/utils/validators'
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, watchEffect } from 'vue';
 
 interface Emit {
-  (e: 'update:isDrawerOpen', value: Boolean): void
+  (e: 'closeDialog', value: Boolean): void
 }
 
 interface Props {
@@ -18,6 +18,7 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 
+const logoFile = ref('')
 const isEditing = ref<Boolean>(false)
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
@@ -25,11 +26,11 @@ const getCompanyId = ref<string | number | null>(props.companyId ?? null)
 
 const companyData = ref({
   'name': '',
-  'logo': [],
+  'logo': undefined,
   'website': '',
   'cmp_email': '',
   'location': '',
-  'is_active' : true
+  'is_active' : false
 })
 
 const cmpAdminData = ref({
@@ -40,9 +41,14 @@ const cmpAdminData = ref({
   'cmp_admin_joining_date': '',
 })
 
+const onLogoChange = (e : any) => {
+  logoFile.value = e.target.files[0];
+}
+
 // 👉 drawer close
 const closeNavigationDrawer = () => {
-  emit('update:isDrawerOpen', false)
+  emit('closeDialog', false)
+  isEditing.value = false
 
   nextTick(() => {
     refForm.value?.reset()
@@ -51,92 +57,85 @@ const closeNavigationDrawer = () => {
 }
 
 // 👉 get the company data on the basis of ID
-const getCompanyData = async () => {
-  if (props.companyId) {
-    isEditing.value = true
-    getCompanyId.value = props.companyId
-    try {
-      const access_token = localStorage.getItem("access_token");
-      const response = await axios.get(`http://127.0.0.1:8000/api/company/${getCompanyId.value}}`, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          'content-type': 'multipart/form-data'
-        }
-      })
-      companyData.value = response.data.company;
-      cmpAdminData.value.cmp_admin_first_name = response.data.employee.user.first_name
-      cmpAdminData.value.cmp_admin_last_name = response.data.employee.user.last_name
-      cmpAdminData.value.cmp_admin_joining_date = response.data.employee.joining_date
-      cmpAdminData.value.cmp_admin_email = response.data.employee.user.email
-      getCompanyId.value = null
-    } catch (error) {
-      console.error("Error submitting data:", error);
+const getCompanyData = async (comId: string | number) => {
+  try {
+    const access_token = localStorage.getItem("access_token");
+    const response = await axios.get(`http://127.0.0.1:8000/api/company/${comId}}`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        'content-type': 'multipart/form-data'
+      }
+    })
+    companyData.value = response.data.company;
+    cmpAdminData.value.cmp_admin_first_name = response.data.employee.user.first_name
+    cmpAdminData.value.cmp_admin_last_name = response.data.employee.user.last_name
+    cmpAdminData.value.cmp_admin_joining_date = response.data.employee.joining_date
+    cmpAdminData.value.cmp_admin_email = response.data.employee.user.email
+    getCompanyId.value = null
+    if(response.data.company.is_active){
+      companyData.value.is_active = true
+    }else{
+      companyData.value.is_active = false
     }
+  } catch (error) {
+    console.error("Error submitting data:", error);
   }
 }
 
 // 👉 edit existig company and create a new company
 const onSubmit = async () => {
-  const access_token = localStorage.getItem("access_token")
-  if (access_token) {
-    try {
-      const formData = new FormData()
-      formData.append('logo', companyData.value.logo[0]);
-      let input = {
-        'logo': companyData.value.logo[0],
-        'name': companyData.value.name,
-        'website': companyData.value.website,
-        'cmp_email': companyData.value.cmp_email,
-        'location': companyData.value.location,
-        'is_active' : companyData.value.is_active,
-        'cmp_admin_first_name': cmpAdminData.value.cmp_admin_first_name,
-        'cmp_admin_last_name': cmpAdminData.value.cmp_admin_last_name,
-        'cmp_admin_email': cmpAdminData.value.cmp_admin_email,
-        'cmp_admin_password': cmpAdminData.value.cmp_admin_password,
-        'cmp_admin_joining_date': cmpAdminData.value.cmp_admin_joining_date,
+  try {
+    const formData = new FormData()
+    formData.append('logo', logoFile.value);
+    let input = {
+      'logo': logoFile.value,
+      'name': companyData.value.name,
+      'website': companyData.value.website,
+      'cmp_email': companyData.value.cmp_email,
+      'location': companyData.value.location,
+      'is_active' : companyData.value.is_active ? 1 : 0,
+      'cmp_admin_first_name': cmpAdminData.value.cmp_admin_first_name,
+      'cmp_admin_last_name': cmpAdminData.value.cmp_admin_last_name,
+      'cmp_admin_email': cmpAdminData.value.cmp_admin_email,
+      'cmp_admin_password': cmpAdminData.value.cmp_admin_password,
+      'cmp_admin_joining_date': cmpAdminData.value.cmp_admin_joining_date,
+    }
+    isEditing.value = props.companyId ? true : false
+    const url = props.companyId ? `http://127.0.0.1:8000/api/company/update/${props.companyId}` : `http://127.0.0.1:8000/api/company/create`
+    const response = await axios.post(url, input, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        'content-type': 'multipart/form-data'
       }
-      isEditing.value = props.companyId ? true : false
-      const url = props.companyId ? `http://127.0.0.1:8000/api/company/update/${props.companyId}` : `http://127.0.0.1:8000/api/company/create`
-      const response = await axios.post(url, input, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          'content-type': 'multipart/form-data'
-        }
-      });
-      if (response.data.status == "200") {
-        closeNavigationDrawer()
-        console.log(response.data.message)
-        getCompanyId.value = null
-        isEditing.value = false
-      } else {
-        console.log(response.data.message)
-      }
-    } catch (error) {
-      console.error("Error submitting data:", error)
-    } 
+    });
+    if (response) {
+      console.log(response.data.message)
+      closeNavigationDrawer()
+      isEditing.value = false
+    }
+  } catch (error) {
+    console.error("Error submitting data:", error)
   }
 };
 
-const handleDrawerModelValueUpdate = (val: boolean) => {
-  emit('update:isDrawerOpen', val)
-}
+watchEffect(() => {
+  if(props.companyId) {
+    isEditing.value = true
+    getCompanyId.value = props.companyId
+    // fetch company details
+    getCompanyData(props.companyId)
+  }else{
+    isEditing.value = false
+    getCompanyId.value = null
+  }
+})
 
-onMounted(() => {
-  getCompanyData();
-});
-
-watch(() => props.companyId ?? null, (newId, oldId) => {
-  getCompanyId.value = newId;
-  getCompanyData()
-});
 </script>
 
 <template>
-  <VNavigationDrawer temporary :width="400" location="end" class="scrollable-content" :model-value="props.isDrawerOpen"
-    @update:model-value="handleDrawerModelValueUpdate">
+  <VNavigationDrawer :width="400" location="end" class="scrollable-content" :model-value="props.isDrawerOpen">
     <!-- 👉 Title -->
     <AppDrawerHeaderSection :title="isEditing ? 'Edit Company' : 'Add Company'" @cancel="closeNavigationDrawer" />
-
     <PerfectScrollbar :options="{ wheelPropagation: false }">
       <VCard flat>
         <VCardText>
@@ -166,7 +165,7 @@ watch(() => props.companyId ?? null, (newId, oldId) => {
 
               <!-- 👉 Logo -->
               <VCol cols="12" v-if="!props.companyId">
-                <VFileInput v-model="companyData.logo" label="Company Logo" prepend-icon="mdi-camera" />
+                <input type="file" accept="image/*" @change="onLogoChange" label="Company Logo" prepend-icon="mdi-camera" />
               </VCol>
 
               <VDivider class="my-4" />
@@ -203,7 +202,7 @@ watch(() => props.companyId ?? null, (newId, oldId) => {
 
               <!-- 👉 Company Status -->
               <VCol cols="12" v-if="props.companyId">
-                <VSwitch label="closed" v-model="companyData.is_active" @click="!companyData.is_active"/>
+                <VSwitch label="closed" v-model="companyData.is_active"/>
               </VCol>
 
               <!-- 👉 Submit and Cancel -->
