@@ -30,7 +30,7 @@ const companyData = ref({
   'website': '',
   'cmp_email': '',
   'location': '',
-  'is_active' : false
+  'is_active': false
 })
 
 const cmpAdminData = ref({
@@ -41,7 +41,7 @@ const cmpAdminData = ref({
   'cmp_admin_joining_date': '',
 })
 
-const onLogoChange = (e : any) => {
+const onLogoChange = (e: any) => {
   logoFile.value = e.target.files[0];
 }
 
@@ -72,9 +72,9 @@ const getCompanyData = async (comId: string | number) => {
     cmpAdminData.value.cmp_admin_joining_date = response.data.employee.joining_date
     cmpAdminData.value.cmp_admin_email = response.data.employee.user.email
     getCompanyId.value = null
-    if(response.data.company.is_active){
+    if (response.data.company.is_active) {
       companyData.value.is_active = true
-    }else{
+    } else {
       companyData.value.is_active = false
     }
   } catch (error) {
@@ -93,7 +93,7 @@ const onSubmit = async () => {
       'website': companyData.value.website,
       'cmp_email': companyData.value.cmp_email,
       'location': companyData.value.location,
-      'is_active' : companyData.value.is_active ? 1 : 0,
+      'is_active': companyData.value.is_active ? 1 : 0,
       'cmp_admin_first_name': cmpAdminData.value.cmp_admin_first_name,
       'cmp_admin_last_name': cmpAdminData.value.cmp_admin_last_name,
       'cmp_admin_email': cmpAdminData.value.cmp_admin_email,
@@ -108,10 +108,13 @@ const onSubmit = async () => {
         'content-type': 'multipart/form-data'
       }
     });
-    if (response) {
+    if (response.data.status == '200') {
+      isEditing.value = false
       console.log(response.data.message)
       closeNavigationDrawer()
-      isEditing.value = false
+    } else {
+      refForm.value?.reset()
+      refForm.value?.resetValidation()
     }
   } catch (error) {
     console.error("Error submitting data:", error)
@@ -119,21 +122,21 @@ const onSubmit = async () => {
 };
 
 watchEffect(() => {
-  if(props.companyId) {
+  if (props.companyId) {
     isEditing.value = true
     getCompanyId.value = props.companyId
     // fetch company details
     getCompanyData(props.companyId)
-  }else{
+  } else {
     isEditing.value = false
     getCompanyId.value = null
   }
 })
-
 </script>
 
 <template>
-  <VNavigationDrawer :width="400" location="end" class="scrollable-content" :model-value="props.isDrawerOpen">
+  <VNavigationDrawer temporary :width="400" location="end" class="scrollable-content"
+    :model-value="props.isDrawerOpen">
     <!-- 👉 Title -->
     <AppDrawerHeaderSection :title="isEditing ? 'Edit Company' : 'Add Company'" @cancel="closeNavigationDrawer" />
     <PerfectScrollbar :options="{ wheelPropagation: false }">
@@ -165,7 +168,9 @@ watchEffect(() => {
 
               <!-- 👉 Logo -->
               <VCol cols="12" v-if="!props.companyId">
-                <input type="file" accept="image/*" @change="onLogoChange" label="Company Logo" prepend-icon="mdi-camera" />
+                <VLabel class="text-subtitle-2 pb-4">Company Logo</VLabel>
+                <input type="file" accept="image/*" @change="onLogoChange" label="Company Logo"
+                  prepend-icon="mdi-camera" />
               </VCol>
 
               <VDivider class="my-4" />
@@ -190,8 +195,8 @@ watchEffect(() => {
 
               <!-- 👉 Company Admin Joining Date -->
               <VCol cols="12">
-                <AppTextField v-model="cmpAdminData.cmp_admin_joining_date" type="date" :rules="[requiredValidator]"
-                  label="Company Admin Joining Date" />
+                <AppDateTimePicker v-model="cmpAdminData.cmp_admin_joining_date" label="Company Admin Joining Date"
+                  placeholder="Select Joining date" :rules="[requiredValidator]" />
               </VCol>
 
               <!-- 👉 Company Admin password -->
@@ -202,7 +207,7 @@ watchEffect(() => {
 
               <!-- 👉 Company Status -->
               <VCol cols="12" v-if="props.companyId">
-                <VSwitch label="closed" v-model="companyData.is_active"/>
+                <VSwitch label="Active" v-model="companyData.is_active" />
               </VCol>
 
               <!-- 👉 Submit and Cancel -->
