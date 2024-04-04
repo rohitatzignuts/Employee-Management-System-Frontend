@@ -1,47 +1,24 @@
 <script lang="ts" setup>
-import axios from 'axios';
+import { useCompanyStore } from '../store/useCompanyStore'
 
-const totalCompanies = ref<number>()
-const totalJobs = ref<number>()
-const isLoading = ref<boolean>(true);
-
-const getAllCompanies = async () => {
-  try {
-    const response = await axios.get('http://127.0.0.1:8000/api/companies');
-    totalCompanies.value = response.data.length;
-  } catch (error) {
-    console.error('Error fetching companies:', error);
-  } finally {
-    isLoading.value = false;
-  }
-}
-const getAllJobs = async () => {
-  try {
-    const response = await axios.get('http://127.0.0.1:8000/api/jobs');
-    totalJobs.value = response.data.length;
-  } catch (error) {
-    console.error('Error fetching jobs:', error);
-  } finally {
-    isLoading.value = false;
-  }
-}
+const store = useCompanyStore()
 
 onMounted(() => {
-  getAllCompanies();
-  getAllJobs();
+  store.getAllCompanies();
+  store.getAllJobs();
 })
 </script>
 
 <template>
   <div>
-    <div v-if="!isLoading">
+    <div v-if="!store.isLoading">
       <VRow>
         <VCol cols="6">
           <RouterLink to="/companies">
             <VCard>
               <VCardTitle>
                 <div>
-                  <VIcon icon="mdi-office-building" /><span class="text-h1">{{ totalCompanies }}</span>
+                  <VIcon icon="mdi-office-building" /><span class="text-h1">{{ store.totalCompanies }}</span>
                 </div>
               </VCardTitle>
               <VCardItem>
@@ -54,7 +31,7 @@ onMounted(() => {
           <VCard>
             <VCardTitle>
               <div>
-                <VIcon icon="mdi-file-account" /><span class="text-h1">{{ totalJobs }}</span>
+                <VIcon icon="mdi-file-account" /><span class="text-h1">{{ store.totalJobs }}</span>
               </div>
             </VCardTitle>
             <VCardItem>

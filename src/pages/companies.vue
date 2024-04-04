@@ -2,15 +2,14 @@
 import AddNewCompanyDrawer from "../demos/forms/AddNewCompanyDrawer.vue";
 import DemoDialogBasic from "../demos/forms/DemoDialogBasic.vue";
 import { VDataTable } from "vuetify/labs/VDataTable";
-import axios from "axios";
 import { ref, onMounted } from "vue";
 import { avatarText } from "@/@core/utils/formatters";
+import { useCompanyStore } from '../store/useCompanyStore'
 
-const companies = ref<Array<Object>>([]);
 const isAddNewUserDrawerVisible = ref<boolean>(false);
-const isLoading = ref<boolean>(true);
 const companyEditId = ref<string | number | any>();
 const deleteCompanyDialog = ref<boolean>(false)
+const store = useCompanyStore()
 
 const headers = [
   { title: "NAME", key: "name" },
@@ -19,21 +18,6 @@ const headers = [
   { title: "STATUS", key: "is_active" },
   { title: "Actions", key: "actions" },
 ];
-
-const getAllCompanies = async () => {
-  try {
-    const response = await axios.get("http://127.0.0.1:8000/api/companies");
-    if (response.data.length > 0) {
-      companies.value = response.data;
-    } else {
-      console.log("No Companies For Now....");
-    }
-  } catch (error: any) {
-    console.log(error.message);
-  } finally {
-    isLoading.value = false;
-  }
-};
 
 const createCompany = () => {
   isAddNewUserDrawerVisible.value = true;
@@ -52,21 +36,21 @@ const handleCompanyDelete = (companyId: string | number) => {
 const dialogClose = () => {
   isAddNewUserDrawerVisible.value = false
   companyEditId.value = null
-  getAllCompanies()
+  store.getAllCompanies()
 }
 
 onMounted(() => {
-  getAllCompanies();
+  store.getAllCompanies();
 });
 
 watchEffect(() => {
-  getAllCompanies();
+  store.getAllCompanies();
 });
 </script>
 
 <template>
   <div>
-    <div v-if="!isLoading">
+    <div v-if="!store.isLoading">
       <div class="d-flex align-center justify-space-between">
         <h1>Companies</h1>
         <VBtn prepend-icon="tabler-plus" @click="createCompany">
@@ -74,7 +58,7 @@ watchEffect(() => {
         </VBtn>
       </div>
       <VDivider class="my-4" />
-      <VDataTable :headers="headers" :items="companies" :items-per-page="10" class="pa-3">
+      <VDataTable :headers="headers" :items="store.companies" :items-per-page="10" class="pa-3">
 
         <template #item.is_active="{ item }">
           <div>
@@ -86,26 +70,21 @@ watchEffect(() => {
         </template>
 
         <template #item.name="{ item }">
-        <div class="d-flex align-center">
-          <!-- avatar -->
-          <VAvatar
-            size="32"
-            :color="item.avatar ? '' : 'primary'"
-            :class="item.avatar  ? '' : 'v-avatar-light-bg primary--text'"
-            :variant="!item.avatar ? 'tonal' : undefined"
-          >
-            <VImg
-              v-if="item.props.title.logo"
-              :src="`http://127.0.0.1:8000/storage/${item.props.title.logo}`"
-            />
-            <span v-else>{{ avatarText(item.props.title.name) }}</span>
-          </VAvatar>
+          <div class="d-flex align-center">
+            <!-- avatar -->
+            <VAvatar size="32" :color="item.avatar ? '' : 'primary'"
+              :class="item.avatar ? '' : 'v-avatar-light-bg primary--text'"
+              :variant="!item.avatar ? 'tonal' : undefined">
+              <VImg v-if="item.props.title.logo" :src="`http://127.0.0.1:8000/storage/${item.props.title.logo}`" />
+              <span v-else>{{ avatarText(item.props.title.name) }}</span>
+            </VAvatar>
 
-          <div class="d-flex flex-column ms-3">
-            <span class="d-block font-weight-medium text-high-emphasis text-truncate">{{ item.props.title.name  }}</span>
+            <div class="d-flex flex-column ms-3">
+              <span class="d-block font-weight-medium text-high-emphasis text-truncate">{{ item.props.title.name
+                }}</span>
+            </div>
           </div>
-        </div>
-      </template>
+        </template>
 
 
         <template #item.actions="{ item }">
@@ -124,6 +103,7 @@ watchEffect(() => {
         @closeDialog="dialogClose" />
     </div>
     <VProgressLinear v-else indeterminate color="primary" />
-    <DemoDialogBasic :isDialogVisible="deleteCompanyDialog" :deleteId="companyEditId" @isDeleteDialogVisible="deleteCompanyDialog = false"/>
+    <DemoDialogBasic :isDialogVisible="deleteCompanyDialog" :deleteId="companyEditId"
+      @isDeleteDialogVisible="deleteCompanyDialog = false" />
   </div>
 </template>

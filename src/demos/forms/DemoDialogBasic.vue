@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import axios from 'axios';
 import { ref } from 'vue';
+import { useCompanyStore } from '../../store/useCompanyStore'
 
 const props = defineProps<{
   isDialogVisible: boolean,
@@ -12,9 +13,10 @@ const emit = defineEmits<{
 }>()
 
 const deleteTypeRef = ref<'permanent' | 'temporary' | null>(null);
+const store = useCompanyStore()
 
 const handleConfirm = () => {
-    // Emit the event to indicate delete confirmation with the selected deleteType
+  // Emit the event to indicate delete confirmation with the selected deleteType
   emit('isDeleteDialogVisible', true)
 }
 
@@ -34,11 +36,12 @@ const handleCompanyDelete = async (companyId: string | number) => {
             Authorization: `Bearer ${access_token}`,
           },
           params: {
-            deleteType: deleteTypeRef.value 
+            deleteType: deleteTypeRef.value
           }
         }
       );
       if (response.data.status == "200") {
+        store.getAllCompanies()
         console.log("Company deleted successfully")
       }
     }
@@ -58,14 +61,14 @@ const handleCompanyDelete = async (companyId: string | number) => {
     <VCard title="How do you want to delete this record ?">
       <VForm @submit.prevent="handleCompanyDelete(props.deleteId)">
         <VCardText class="demo-space-x">
-          <VCheckbox v-model="deleteTypeRef" value="permanent" label="Permanently" name="deleteType"/>
-          <VCheckbox v-model="deleteTypeRef" value="temporary" label="Temporarily" name="deleteType"/>
+          <VCheckbox v-model="deleteTypeRef" value="permanent" label="Permanently" name="deleteType" />
+          <VCheckbox v-model="deleteTypeRef" value="temporary" label="Temporarily" name="deleteType" />
         </VCardText>
         <VCardText class="d-flex justify-end gap-2">
           <VBtn @click="handleConfirm" type="submit">
             Confirm
           </VBtn>
-          <VBtn @click="handleCancel" color="secondary" >
+          <VBtn @click="handleCancel" color="secondary">
             Cancel
           </VBtn>
         </VCardText>

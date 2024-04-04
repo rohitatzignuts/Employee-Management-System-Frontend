@@ -135,8 +135,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <VNavigationDrawer temporary :width="400" location="end" class="scrollable-content"
-    :model-value="props.isDrawerOpen">
+  <VNavigationDrawer temporary :width="400" location="end" class="scrollable-content" :model-value="props.isDrawerOpen">
     <!-- 👉 Title -->
     <AppDrawerHeaderSection :title="isEditing ? 'Edit Company' : 'Add Company'" @cancel="closeNavigationDrawer" />
     <PerfectScrollbar :options="{ wheelPropagation: false }">

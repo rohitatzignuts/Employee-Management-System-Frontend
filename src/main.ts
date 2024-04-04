@@ -6,7 +6,7 @@ import vuetify from '@/plugins/vuetify'
 import { loadFonts } from '@/plugins/webfontloader'
 import router from '@/router'
 import '@core/scss/template/index.scss'
-import '@styles/styles.scss'
+import '@styles/styles.scss'    
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import VueSweetalert2 from 'vue-sweetalert2';
