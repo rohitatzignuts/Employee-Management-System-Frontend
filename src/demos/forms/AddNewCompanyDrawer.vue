@@ -34,11 +34,11 @@ const companyData = ref({
 })
 
 const cmpAdminData = ref({
-  'cmp_admin_first_name': '',
-  'cmp_admin_last_name': '',
-  'cmp_admin_email': '',
-  'cmp_admin_password': '',
-  'cmp_admin_joining_date': '',
+  'first_name': '',
+  'last_name': '',
+  'email': '',
+  'password': '',
+  'joining_date': '',
 })
 
 const onLogoChange = (e: any) => {
@@ -59,18 +59,15 @@ const closeNavigationDrawer = () => {
 // 👉 get the company data on the basis of ID
 const getCompanyData = async (comId: string | number) => {
   try {
-    const access_token = localStorage.getItem("access_token");
+    const access_token = localStorage.getItem("access_token")
     const response = await axios.get(`http://127.0.0.1:8000/api/company/${comId}}`, {
       headers: {
         Authorization: `Bearer ${access_token}`,
         'content-type': 'multipart/form-data'
       }
     })
-    companyData.value = response.data.company;
-    cmpAdminData.value.cmp_admin_first_name = response.data.employee.user.first_name
-    cmpAdminData.value.cmp_admin_last_name = response.data.employee.user.last_name
-    cmpAdminData.value.cmp_admin_joining_date = response.data.employee.joining_date
-    cmpAdminData.value.cmp_admin_email = response.data.employee.user.email
+    companyData.value = response.data.company;    
+    cmpAdminData.value = response.data.employee
     getCompanyId.value = null
     if (response.data.company.is_active) {
       companyData.value.is_active = true
@@ -94,11 +91,11 @@ const onSubmit = async () => {
       'cmp_email': companyData.value.cmp_email,
       'location': companyData.value.location,
       'is_active': companyData.value.is_active ? 1 : 0,
-      'cmp_admin_first_name': cmpAdminData.value.cmp_admin_first_name,
-      'cmp_admin_last_name': cmpAdminData.value.cmp_admin_last_name,
-      'cmp_admin_email': cmpAdminData.value.cmp_admin_email,
-      'cmp_admin_password': cmpAdminData.value.cmp_admin_password,
-      'cmp_admin_joining_date': cmpAdminData.value.cmp_admin_joining_date,
+      'first_name': cmpAdminData.value.first_name,
+      'last_name': cmpAdminData.value.last_name,
+      'email': cmpAdminData.value.email,
+      'password': cmpAdminData.value.password,
+      'joining_date': cmpAdminData.value.joining_date,
     }
     isEditing.value = props.companyId ? true : false
     const url = props.companyId ? `http://127.0.0.1:8000/api/company/update/${props.companyId}` : `http://127.0.0.1:8000/api/company/create`
@@ -176,31 +173,31 @@ watchEffect(() => {
 
               <!-- 👉 Company Admin First Name -->
               <VCol cols="12">
-                <AppTextField v-model="cmpAdminData.cmp_admin_first_name" :rules="[requiredValidator]"
+                <AppTextField v-model="cmpAdminData.first_name" :rules="[requiredValidator]"
                   label="Company Admin First Name" />
               </VCol>
 
               <!-- 👉 Company Admin last Name -->
               <VCol cols="12">
-                <AppTextField v-model="cmpAdminData.cmp_admin_last_name" :rules="[requiredValidator]"
+                <AppTextField v-model="cmpAdminData.last_name" :rules="[requiredValidator]"
                   label="Company Admin Last Name" />
               </VCol>
 
               <!-- 👉 Company Admin Email -->
               <VCol cols="12">
-                <AppTextField v-model="cmpAdminData.cmp_admin_email" type="email"
+                <AppTextField v-model="cmpAdminData.email" type="email"
                   :rules="[requiredValidator, emailValidator]" label="Company Admin Email" />
               </VCol>
 
               <!-- 👉 Company Admin Joining Date -->
               <VCol cols="12">
-                <AppDateTimePicker v-model="cmpAdminData.cmp_admin_joining_date" label="Company Admin Joining Date"
+                <AppDateTimePicker v-model="cmpAdminData.joining_date" label="Company Admin Joining Date"
                   placeholder="Select Joining date" :rules="[requiredValidator]" />
               </VCol>
 
               <!-- 👉 Company Admin password -->
               <VCol cols="12" v-if="!props.companyId">
-                <AppTextField v-model="cmpAdminData.cmp_admin_password" type="password" :rules="[requiredValidator]"
+                <AppTextField v-model="cmpAdminData.password" type="password" :rules="[requiredValidator]"
                   label="Company Admin password" />
               </VCol>
 

@@ -25,6 +25,7 @@ const handleLogin = async () => {
   try {
     const respone = await axios.post('http://127.0.0.1:8000/api/login',loginData.value)
     if(respone.data && respone.data.access_token){
+      localStorage.setItem("username", loginData.value.email);
       localStorage.setItem("access_token", respone.data.access_token);
       router.push({ path: "/" });
       loginData.value.email = "";

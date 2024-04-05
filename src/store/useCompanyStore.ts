@@ -8,8 +8,13 @@ export const useCompanyStore = defineStore('companies', () => {
     const companies = ref<Array<Object>>([]);
 
     const getAllCompanies = async () => {
+        const access_token = localStorage.getItem("access_token");
         try {
-            const response = await axios.get('http://127.0.0.1:8000/api/companies');
+            const response = await axios.get('http://127.0.0.1:8000/api/companies', {
+                headers : {
+                    Authorization: `Bearer ${access_token}`,
+                }
+            });
             if (response.data.length > 0) {
                 companies.value = response.data;
                 totalCompanies.value = response.data.length;
