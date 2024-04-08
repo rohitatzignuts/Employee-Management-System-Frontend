@@ -10,7 +10,7 @@ export const useCompanyStore = defineStore('companies', () => {
     const getAllCompanies = async () => {
         const access_token = localStorage.getItem("access_token");
         try {
-            const response = await axios.get('http://127.0.0.1:8000/api/companies', {
+            const response = await axios.get('companies', {
                 headers : {
                     Authorization: `Bearer ${access_token}`,
                 }
@@ -30,7 +30,7 @@ export const useCompanyStore = defineStore('companies', () => {
 
     const getAllJobs = async () => {
         try {
-            const response = await axios.get('http://127.0.0.1:8000/api/jobs');
+            const response = await axios.get('jobs');
             totalJobs.value = response.data.length;
         } catch (error) {
             console.error('Error fetching jobs:', error);

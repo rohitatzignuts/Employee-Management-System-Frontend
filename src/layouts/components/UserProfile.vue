@@ -9,7 +9,7 @@ const handleLogout = async () => {
   const accessToken = localStorage.getItem('access_token')
   try {
     const response = await axios.post(
-      'http://127.0.0.1:8000/api/logout',
+      'logout',
       null, // No data to send in the request body
       {
         headers: {

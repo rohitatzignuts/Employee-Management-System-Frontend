@@ -9,7 +9,8 @@ import '@core/scss/template/index.scss'
 import '@styles/styles.scss'    
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
-import VueSweetalert2 from 'vue-sweetalert2';
+import './axios.ts'
+import VueSweetalert2 from 'vue-sweetalert2';   
 import 'sweetalert2/dist/sweetalert2.min.css';
 loadFonts()
 

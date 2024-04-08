@@ -29,8 +29,7 @@ const handleCompanyDelete = async (companyId: string | number) => {
   const access_token = localStorage.getItem("access_token");
   try {
     if (access_token) {
-      const response = await axios.delete(
-        `http://127.0.0.1:8000/api/company/${companyId}`,
+      const response = await axios.delete(`company/${companyId}`,
         {
           headers: {
             Authorization: `Bearer ${access_token}`,
@@ -43,6 +42,7 @@ const handleCompanyDelete = async (companyId: string | number) => {
       if (response.data.status == "200") {
         store.getAllCompanies()
         console.log("Company deleted successfully")
+        deleteTypeRef.value = null
       }
     }
   } catch (error: any) {

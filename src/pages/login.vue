@@ -9,6 +9,7 @@ import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import axios from 'axios'
 import router from '@/router'
+import { emailValidator, requiredValidator } from '../@core/utils/validators'
 
 const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
 
@@ -23,7 +24,7 @@ const loginData = ref({
 })
 const handleLogin = async () => {
   try {
-    const respone = await axios.post('http://127.0.0.1:8000/api/login',loginData.value)
+    const respone = await axios.post('login',loginData.value)
     if(respone.data && respone.data.access_token){
       localStorage.setItem("username", loginData.value.email);
       localStorage.setItem("access_token", respone.data.access_token);
@@ -95,6 +96,7 @@ const handleLogin = async () => {
                   label="Email"
                   type="email"
                   autofocus
+                  :rules="[emailValidator, requiredValidator]"
                 />
               </VCol>
 
@@ -106,6 +108,7 @@ const handleLogin = async () => {
                   :type="isPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                  :rules="[requiredValidator]"
                 />
 
                 <VBtn

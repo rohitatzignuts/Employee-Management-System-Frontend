@@ -60,7 +60,7 @@ const closeNavigationDrawer = () => {
 const getCompanyData = async (comId: string | number) => {
   try {
     const access_token = localStorage.getItem("access_token")
-    const response = await axios.get(`http://127.0.0.1:8000/api/company/${comId}}`, {
+    const response = await axios.get(`company/${comId}}`, {
       headers: {
         Authorization: `Bearer ${access_token}`,
         'content-type': 'multipart/form-data'
@@ -98,7 +98,7 @@ const onSubmit = async () => {
       'joining_date': cmpAdminData.value.joining_date,
     }
     isEditing.value = props.companyId ? true : false
-    const url = props.companyId ? `http://127.0.0.1:8000/api/company/update/${props.companyId}` : `http://127.0.0.1:8000/api/company/create`
+    const url = props.companyId ? `company/update/${props.companyId}` : `company/create`
     const response = await axios.post(url, input, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
