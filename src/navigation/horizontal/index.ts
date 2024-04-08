@@ -11,4 +11,9 @@ export default [
     to: { name: 'companies' },
     icon: { icon: 'tabler-file' },
   },
+  {
+    title: 'Employees',
+    to: { name: 'employees' },
+    icon: { icon: 'tabler-file' },
+  },
 ] as HorizontalNavItems

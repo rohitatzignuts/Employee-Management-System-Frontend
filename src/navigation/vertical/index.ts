@@ -9,6 +9,11 @@ export default [
   {
     title: 'Companies',
     to: { name: 'companies' },
-    icon: { icon: 'tabler-file' },
+    icon: { icon: 'tabler-building' },  
+  },
+  {
+    title: 'Employees',
+    to: { name: 'employees' },
+    icon: { icon: 'tabler-user' },
   },
 ] as VerticalNavItems

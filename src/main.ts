@@ -22,7 +22,7 @@ const options = {
 const app = createApp(App)
 
 // Use plugins
-app.use(VueSweetalert2,options);
+app.use(VueSweetalert2,options)
 app.use(vuetify)
 app.use(createPinia())
 app.use(router)
