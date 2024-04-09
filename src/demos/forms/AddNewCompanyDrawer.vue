@@ -18,9 +18,9 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 
-const logoFile = ref('')
+const logoFile = ref<string | null>('')
 const isEditing = ref<Boolean>(false)
-const isFormValid = ref(false)
+const isFormValid = ref<Boolean>(false)
 const refForm = ref<VForm>()
 const getCompanyId = ref<string | number | null>(props.companyId ?? null)
 

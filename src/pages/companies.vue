@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AddNewCompanyDrawer from "../demos/forms/AddNewCompanyDrawer.vue";
-import DemoDialogBasic from "../demos/forms/DemoDialogBasic.vue";
+import DeleteCompanyDialogBasic from "../demos/forms/DeleteCompanyDialogBasic.vue";
 import { VDataTable } from "vuetify/labs/VDataTable";
 import { ref, onMounted } from "vue";
 import { avatarText } from "@/@core/utils/formatters";
@@ -40,12 +40,12 @@ const dialogClose = () => {
 }
 
 onMounted(() => {
-  store.getAllCompanies();
-});
+  store.getAllCompanies()  
+})
 
 watchEffect(() => {
-  store.getAllCompanies();
-});
+  store.getAllCompanies()
+})
 </script>
 
 <template>
@@ -103,7 +103,7 @@ watchEffect(() => {
         @closeDialog="dialogClose" />
     </div>
     <VProgressLinear v-else indeterminate color="primary" />
-    <DemoDialogBasic :isDialogVisible="deleteCompanyDialog" :deleteId="companyEditId"
+    <DeleteCompanyDialogBasic :isDialogVisible="deleteCompanyDialog" :deleteId="companyEditId"
       @isDeleteDialogVisible="deleteCompanyDialog = false" />
   </div>
 </template>

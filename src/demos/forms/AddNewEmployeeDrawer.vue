@@ -6,6 +6,7 @@ import axios from 'axios';
 import { emailValidator, requiredValidator } from '../../@core/utils/validators'
 import { ref, nextTick, watchEffect, computed, onMounted } from 'vue';
 import { useCompanyStore } from '../../store/useCompanyStore'
+import { get } from '@vueuse/core';
 
 interface Emit {
   (e: 'closeDialog', value: Boolean): void
@@ -24,16 +25,14 @@ const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const getEmployeeId = ref<string | number | null>(props.employeeId ?? null)
 const empRoles = ['cmp_admin', 'employee']
-
-const allCompanies = computed( () => {
-  store.companies.map((cmp: { name: string; }) => cmp.name);
-})
-console.log(allCompanies);
+let resisteredCompanies = ref([]);
 
 const empData = ref({
   "first_name": "",
+  "last_name": "",
   "role": "",
   "email": "",
+  "password": "",
   "joining_date": "",
   "company_name": ""
 })
@@ -53,19 +52,18 @@ const closeNavigationDrawer = () => {
 const getEmployeeData = async (empId: string | number) => {
   try {
     const access_token = localStorage.getItem("access_token")
-    const response = await axios.get(`employee/${empId}}`, {
+    const response = await axios.get(`employee/${empId}`, {
       headers: {
         Authorization: `Bearer ${access_token}`,
-        'content-type': 'multipart/form-data'
       }
     })
-    empData.value.first_name = response.data.first_name;
-    empData.value.email = response.data.email;
-    empData.value.joining_date = response.data.joining_date;
-    empData.value.role = response.data.role;
+    empData.value.first_name = response.data.employee.first_name;
+    empData.value.last_name = response.data.employee.last_name;
+    empData.value.email = response.data.employee.email;
+    empData.value.joining_date = response.data.employee.joining_date;
     getEmployeeId.value = null
   } catch (error) {
-    console.error("Error submitting data:", error);
+    console.error("Error Getting data:", error);
   }
 }
 
@@ -74,7 +72,10 @@ const onSubmit = async () => {
   try {
     let input = {
       'first_name': empData.value.first_name,
+      'last_name': empData.value.last_name,
       'email': empData.value.email,
+      'password': empData.value.password,
+      'company_name': empData.value.company_name,
       'joining_date': empData.value.joining_date,
       'role': empData.value.role,
     }
@@ -100,6 +101,10 @@ const onSubmit = async () => {
 };
 
 watchEffect(() => {
+  resisteredCompanies.value = store.companies.map(cmp => cmp.name);
+});
+
+watchEffect(() => {
   if (props.employeeId) {
     isEditing.value = true
     getEmployeeId.value = props.employeeId
@@ -114,6 +119,7 @@ watchEffect(() => {
 onMounted(() => {
   store.getAllCompanies()
 })
+
 </script>
 
 <template>
@@ -126,31 +132,44 @@ onMounted(() => {
           <!-- 👉 Form -->
           <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit" enctype="multipart/form-data">
             <VRow>
-              <!-- 👉 Company Admin First Name -->
+              <!-- 👉 Employee  First Name -->
               <VCol cols="12">
                 <AppTextField v-model="empData.first_name" :rules="[requiredValidator]" label="First Name"
                   placeholder="First Name" />
               </VCol>
 
-              <!-- 👉 Company Admin Email -->
+              <VCol cols="12">
+                <AppTextField v-model="empData.last_name" :rules="[requiredValidator]" label="Last Name"
+                  placeholder="Last Name" />
+              </VCol>
+
+              <!-- 👉 Employee  Email -->
               <VCol cols="12">
                 <AppTextField v-model="empData.email" type="email" :rules="[requiredValidator, emailValidator]"
                   label="Email" placeholder="Email" />
               </VCol>
 
-              <!-- 👉 Company Admin Joining Date -->
+              <!-- 👉 Employee  Joining Date -->
               <VCol cols="12">
                 <AppDateTimePicker v-model="empData.joining_date" label="Joining Date" placeholder="Select Joining date"
                   :rules="[requiredValidator]" />
               </VCol>
 
-              <!-- 👉 Company Admin role -->
-              <VCol cols="12">
-                <AppSelect label="Role" :items="empRoles" placeholder="Select Role" v-model="empData.role"/>
+              <!-- 👉 Employee  role -->
+              <VCol cols="12" v-if="!props.employeeId">
+                <AppSelect label="Role" :items="empRoles" placeholder="Select Role" v-model="empData.role" required/>
               </VCol>
 
-              <VCol cols="12">
-                <AppSelect label="Companies" :items="allCompanies" placeholder="Select Company" v-model="empData.company_name"/>
+              <!-- 👉 Employee  password -->
+              <VCol cols="12" v-if="!props.employeeId">
+                <AppTextField v-model="empData.password" type="password" :rules="[requiredValidator]"
+                  label="Employee password" placeholder="Employee password" />
+              </VCol>
+
+              <!-- 👉 Employee Company -->
+              <VCol cols="12" v-if="!props.employeeId">
+                <AppSelect label="Companies" :items="resisteredCompanies" placeholder="Select Company"
+                  v-model="empData.company_name" required />
               </VCol>
 
               <!-- 👉 Submit and Cancel -->
