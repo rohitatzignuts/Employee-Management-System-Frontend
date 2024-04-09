@@ -6,7 +6,7 @@ import axios from 'axios';
 import { emailValidator, requiredValidator } from '../../@core/utils/validators'
 import { ref, nextTick, watchEffect, computed, onMounted } from 'vue';
 import { useCompanyStore } from '../../store/useCompanyStore'
-import { get } from '@vueuse/core';
+import { useEmployeesStore } from '../../store/useEmployeesStore'
 
 interface Emit {
   (e: 'closeDialog', value: Boolean): void
@@ -20,17 +20,16 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 const store = useCompanyStore()
+const eStore = useEmployeesStore()
 const isEditing = ref<Boolean>(false)
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const getEmployeeId = ref<string | number | null>(props.employeeId ?? null)
-const empRoles = ['cmp_admin', 'employee']
 let resisteredCompanies = ref([]);
 
 const empData = ref({
   "first_name": "",
   "last_name": "",
-  "role": "",
   "email": "",
   "password": "",
   "joining_date": "",
@@ -77,14 +76,12 @@ const onSubmit = async () => {
       'password': empData.value.password,
       'company_name': empData.value.company_name,
       'joining_date': empData.value.joining_date,
-      'role': empData.value.role,
     }
     isEditing.value = props.employeeId ? true : false
     const url = props.employeeId ? `employee/update/${props.employeeId}` : `employee/create`
     const response = await axios.post(url, input, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        'content-type': 'multipart/form-data'
       }
     });
     if (response.data.status == '200') {
@@ -155,11 +152,6 @@ onMounted(() => {
                   :rules="[requiredValidator]" />
               </VCol>
 
-              <!-- 👉 Employee  role -->
-              <VCol cols="12" v-if="!props.employeeId">
-                <AppSelect label="Role" :items="empRoles" placeholder="Select Role" v-model="empData.role" required/>
-              </VCol>
-
               <!-- 👉 Employee  password -->
               <VCol cols="12" v-if="!props.employeeId">
                 <AppTextField v-model="empData.password" type="password" :rules="[requiredValidator]"
@@ -168,7 +160,7 @@ onMounted(() => {
 
               <!-- 👉 Employee Company -->
               <VCol cols="12" v-if="!props.employeeId">
-                <AppSelect label="Companies" :items="resisteredCompanies" placeholder="Select Company"
+                <AppSelect label="Companies" :items="resisteredCompanies = null ? resisteredCompanies : eStore.storedCmpName" placeholder="Select Company"
                   v-model="empData.company_name" required />
               </VCol>
 

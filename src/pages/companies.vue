@@ -5,12 +5,19 @@ import { VDataTable } from "vuetify/labs/VDataTable";
 import { ref, onMounted } from "vue";
 import { avatarText } from "@/@core/utils/formatters";
 import { useCompanyStore } from '../store/useCompanyStore'
+import misc404 from '@images/pages/404.png'
+import CryptoJS from 'crypto-js';
 
+const userRole = CryptoJS.AES.decrypt(localStorage.getItem('userRole'), "role").toString(CryptoJS.enc.Utf8)
 const isAddNewUserDrawerVisible = ref<boolean>(false);
 const companyEditId = ref<string | number | any>();
 const deleteCompanyDialog = ref<boolean>(false)
 const store = useCompanyStore()
+import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
+import miscMaskDark from '@images/pages/misc-mask-dark.png'
+import miscMaskLight from '@images/pages/misc-mask-light.png'
 
+const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
 const headers = [
   { title: "NAME", key: "name" },
   { title: "EMAIL", key: "cmp_email" },
@@ -40,17 +47,15 @@ const dialogClose = () => {
 }
 
 onMounted(() => {
-  store.getAllCompanies()  
-})
-
-watchEffect(() => {
-  store.getAllCompanies()
+  if (userRole === 'admin') {
+    store.getAllCompanies()
+  }
 })
 </script>
 
 <template>
   <div>
-    <div v-if="!store.isLoading">
+    <div v-if="userRole === 'admin'">
       <div class="d-flex align-center justify-space-between">
         <h1>Companies</h1>
         <VBtn prepend-icon="tabler-plus" @click="createCompany">
@@ -101,9 +106,17 @@ watchEffect(() => {
       </VDataTable>
       <AddNewCompanyDrawer :is-drawer-open="isAddNewUserDrawerVisible" :company-id="companyEditId"
         @closeDialog="dialogClose" />
+      <DeleteCompanyDialogBasic :isDialogVisible="deleteCompanyDialog" :deleteId="companyEditId"
+        @isDeleteDialogVisible="deleteCompanyDialog = false" />
     </div>
-    <VProgressLinear v-else indeterminate color="primary" />
-    <DeleteCompanyDialogBasic :isDialogVisible="deleteCompanyDialog" :deleteId="companyEditId"
-      @isDeleteDialogVisible="deleteCompanyDialog = false" />
-  </div>
+    <div v-else>
+      <div class="misc-avatar w-100 text-center">
+        <VCard class="pa-4">
+          <VCardTitle class="font-weight-bold">Unauthorized</VCardTitle>
+          <VDivider/>
+          <VImg :src="misc404" alt="Coming Soon" :max-width="200" class="mx-auto py-4" />
+        </VCard>
+      </div>
+    </div>
+    </div>
 </template>

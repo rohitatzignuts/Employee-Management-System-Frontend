@@ -10,69 +10,55 @@ import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import axios from 'axios'
 import router from '@/router'
 import { emailValidator, requiredValidator } from '../@core/utils/validators'
-
-const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
-
-const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
-
-const isPasswordVisible = ref(false)
+import CryptoJS from 'crypto-js'
 
 const refVForm = ref<VForm>()
 const loginData = ref({
   email: '',
   password: '',
 })
+
+const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
+const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
+
+const isPasswordVisible = ref(false)
+
+
 const handleLogin = async () => {
   try {
-    const respone = await axios.post('login',loginData.value)
-    if(respone.data && respone.data.access_token){
-      localStorage.setItem("username", loginData.value.email);
-      localStorage.setItem("access_token", respone.data.access_token);
-      router.push({ path: "/" });
-      loginData.value.email = "";
-      loginData.value.password = "";
+    const response = await axios.post('login', loginData.value)
+    if (response.data && response.data.access_token) {
+      localStorage.setItem("username", loginData.value.email)
+      localStorage.setItem("access_token", response.data.access_token)
+      router.push('/')
+      localStorage.setItem("userRole", CryptoJS.AES.encrypt(response.data.role, "role").toString())
+      localStorage.setItem("company", CryptoJS.AES.encrypt(JSON.stringify({
+        id: response.data.company_id,
+        name: response.data.company_name
+      }), "company").toString())
+      loginData.value.email = ""
+      loginData.value.password = ""
     }
-  } catch (error : any) {
-    console.log(error);
+  } catch (error) {
+    console.log(error)
   }
 }
 </script>
 
 <template>
-  <VRow
-    no-gutters
-    class="auth-wrapper bg-surface"
-  >
-    <VCol
-      lg="8"
-      class="d-none d-lg-flex"
-    >
+  <VRow no-gutters class="auth-wrapper bg-surface">
+    <VCol lg="8" class="d-none d-lg-flex">
       <div class="position-relative bg-background rounded-lg w-100 ma-8 me-0">
         <div class="d-flex align-center justify-center w-100 h-100">
-          <VImg
-            max-width="505"
-            :src="authThemeImg"
-            class="auth-illustration mt-16 mb-2"
-          />
+          <VImg max-width="505" :src="authThemeImg" class="auth-illustration mt-16 mb-2" />
         </div>
 
-        <VImg
-          :src="authThemeMask"
-          class="auth-footer-mask"
-        />
+        <VImg :src="authThemeMask" class="auth-footer-mask" />
       </div>
     </VCol>
 
-    <VCol
-      cols="12"
-      lg="4"
-      class="auth-card-v2 d-flex align-center justify-center"
-    >
-      <VCard
-        flat
-        :max-width="500"
-        class="mt-12 mt-sm-0 pa-4"
-      >
+    <VCol cols="12" lg="4" class="auth-card-v2 d-flex align-center justify-center">
+      <VCard flat :max-width="500" class="mt-12 mt-sm-0 pa-4">
         <VCardText>
           <h5 class="text-h5 mb-1">
             Welcome ! 👋🏻
@@ -84,53 +70,31 @@ const handleLogin = async () => {
         </VCardText>
 
         <VCardText>
-          <VForm
-            ref="refVForm"
-            @submit.prevent="handleLogin"
-          >
+          <VForm ref="refVForm" @submit.prevent="handleLogin">
             <VRow>
               <!-- email -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="loginData.email"
-                  label="Email"
-                  type="email"
-                  autofocus
-                  :rules="[emailValidator, requiredValidator]"
-                />
+                <AppTextField v-model="loginData.email" label="Email" type="email" autofocus
+                  :rules="[emailValidator, requiredValidator]" />
               </VCol>
 
               <!-- password -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="loginData.password"
-                  label="Password"
+                <AppTextField v-model="loginData.password" label="Password"
                   :type="isPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                  @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                  :rules="[requiredValidator]"
-                />
+                  @click:append-inner="isPasswordVisible = !isPasswordVisible" :rules="[requiredValidator]" />
 
-                <VBtn
-                  block
-                  type="submit"
-                  class="mt-8"
-                >
+                <VBtn block type="submit" class="mt-8">
                   Login
                 </VBtn>
               </VCol>
 
               <!-- create account -->
-              <VCol
-                cols="12"
-                class="text-center"
-              >
+              <VCol cols="12" class="text-center">
                 <span>New on our platform?</span>
 
-                <a
-                  class="text-primary ms-2"
-                  href="#"
-                >
+                <a class="text-primary ms-2" href="#">
                   Create an account
                 </a>
               </VCol>
@@ -143,7 +107,7 @@ const handleLogin = async () => {
 </template>
 
 <style lang="scss">
-@use "@core/scss/template/pages/page-auth.scss";
+@use "@core/scss/template/pages/page-auth.scss"
 </style>
 
 <route lang="yaml">

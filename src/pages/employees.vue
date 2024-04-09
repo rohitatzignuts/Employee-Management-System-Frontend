@@ -4,6 +4,9 @@ import { useEmployeesStore } from '../store/useEmployeesStore'
 import { VDataTable } from "vuetify/labs/VDataTable"
 import AddNewEmployeeDrawer from "../demos/forms/AddNewEmployeeDrawer.vue"
 import DeleteEmployeeDialogBasic from '../demos/forms/DeleteEmployeeDialogBasic.vue'
+import CryptoJS from 'crypto-js';
+
+const userRole = CryptoJS.AES.decrypt(localStorage.getItem('userRole'), "role").toString(CryptoJS.enc.Utf8)
 const store = useEmployeesStore()
 const isAddNewUserDrawerVisible = ref<boolean>(false)
 const employeeEditid = ref<string | number | any>()
@@ -23,7 +26,10 @@ const headers = [
 const dialogClose = () => {
     isAddNewUserDrawerVisible.value = false
     employeeEditid.value = null
-    store.getAllEmployees()
+    store.getCompanyEmployees()
+    if(userRole === 'admin'){
+        store.getAllEmployees()
+    }
 }
 
 const handleEmployeeCreate = () => {
@@ -31,22 +37,21 @@ const handleEmployeeCreate = () => {
     employeeEditid.value = null;
 }
 
-const handleEmployeeEdit = (employeeId : number) => {
+const handleEmployeeEdit = (employeeId: number) => {
     employeeEditid.value = employeeId
     isAddNewUserDrawerVisible.value = true;
 }
 
-const handleEmployeeDelete = (employeeId : number) => {
+const handleEmployeeDelete = (employeeId: number) => {
     employeeDeleteid.value = employeeId
     deleteCompanyDialog.value = true;
 }
 
 onMounted(() => {
-    store.getAllEmployees();
-});
-
-watchEffect(() => {
-    store.getAllEmployees();
+    if(userRole === 'admin'){
+        store.getAllEmployees()
+    }
+    store.getCompanyEmployees()
 });
 </script>
 
@@ -59,25 +64,57 @@ watchEffect(() => {
             </VBtn>
         </div>
         <VDivider class="my-4" />
-        <VDataTable :headers="headers" :items="store.employees" :items-per-page="10" class="pa-3">
-            <template #item.actions="{ item }">
-                <div class="d-flex gap-1">
-                    <IconBtn @click="handleEmployeeEdit(item.props.title.id)">
-                        <VIcon icon="tabler-edit" />
-                    </IconBtn>
-                    <IconBtn @click="handleEmployeeDelete(item.props.title.id)">
-                        <VIcon icon="tabler-trash" />
-                    </IconBtn>
-                </div>
-            </template>
-            <template #item.role="{ item }">
-                <VChip :color="item.props.title.role === 'cmp_admin' ? 'primary' : 'success'">
-                    {{ item.props.title.role }}
-                </VChip>
-            </template>
-        </VDataTable>
-        <AddNewEmployeeDrawer :employee-id="employeeEditid" :is-drawer-open="isAddNewUserDrawerVisible" @close-dialog="dialogClose"/>
+
+        <!-- show all employees of all the companies if user is Admin  -->
+        <div v-if="userRole === 'admin'">
+            <VDataTable :headers="headers" :items="store.employees" :items-per-page="10" class="pa-3">
+                <template #item.actions="{ item }">
+                    <div class="d-flex gap-1">
+                        <IconBtn @click="handleEmployeeEdit(item.props.title.id)">
+                            <VIcon icon="tabler-edit" />
+                        </IconBtn>
+                        <IconBtn @click="handleEmployeeDelete(item.props.title.id)">
+                            <VIcon icon="tabler-trash" />
+                        </IconBtn>
+                    </div>
+                </template>
+                <template #item.role="{ item }">
+                    <VChip :color="item.props.title.role === 'cmp_admin' ? 'primary' : 'success'">
+                        {{ item.props.title.role }}
+                    </VChip>
+                </template>
+            </VDataTable>
+        </div>
+        <!--  -->
+
+        <!-- show all employees of all a perticular company  -->
+        <div v-if="userRole === 'cmp_admin'">
+            <VDataTable :headers="headers" :items="store.cmpEmployees" :items-per-page="10" class="pa-3">
+                <template #item.actions="{ item }">
+                    <div class="d-flex gap-1">
+                        <IconBtn @click="handleEmployeeEdit(item.props.title.id)">
+                            <VIcon icon="tabler-edit" />
+                        </IconBtn>
+                        <IconBtn @click="handleEmployeeDelete(item.props.title.id)">
+                            <VIcon icon="tabler-trash" />
+                        </IconBtn>
+                    </div>
+                </template>
+                <template #item.role="{ item }">
+                    <VChip :color="item.props.title.role === 'cmp_admin' ? 'primary' : 'success'">
+                        {{ item.props.title.role }}
+                    </VChip>
+                </template>
+                <template #item.company_name="{ item }">
+                    {{store.storedCmpName[0]}}
+                </template>
+            </VDataTable>
+        </div>
+        <!--  -->
+
+        <AddNewEmployeeDrawer :employee-id="employeeEditid" :is-drawer-open="isAddNewUserDrawerVisible"
+            @close-dialog="dialogClose" />
         <DeleteEmployeeDialogBasic :isDialogVisible="deleteCompanyDialog" :employee-id="employeeDeleteid"
-      @isDeleteDialogVisible="deleteCompanyDialog = false" />
+            @isDeleteDialogVisible="deleteCompanyDialog = false" />
     </div>
 </template>
