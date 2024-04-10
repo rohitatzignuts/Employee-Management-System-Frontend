@@ -3,18 +3,20 @@ import { onMounted } from 'vue';
 import { useCompanyStore } from '../store/useCompanyStore'
 import { useAuthStore } from '@/store/useAuthStore';
 import { useEmployeesStore } from '@/store/useEmployeesStore';
+import {useJobsStore} from '@/store/useJobsStore'
 
 const store = useCompanyStore()
 const username = localStorage.getItem('username')
 const aStore = useAuthStore()
 const eStore = useEmployeesStore()
+const jStore = useJobsStore()
 
 onMounted(() => {
   if (aStore.userRole === "admin") {
     store.getAllCompanies()
   }
   eStore.getCompanyEmployees()
-  store.getAllJobs();
+  jStore.getAllJobs();
 })
 </script>
 
@@ -56,7 +58,7 @@ onMounted(() => {
           <VCard>
             <VCardTitle>
               <div>
-                <VIcon icon="mdi-file-account" /><span class="text-h1">{{ store.totalJobs }}</span>
+                <VIcon icon="mdi-file-account" /><span class="text-h1">{{ jStore.totalJobsCount }}</span>
               </div>
             </VCardTitle>
             <VCardItem>

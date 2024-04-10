@@ -3,7 +3,6 @@ import axios from 'axios';
 export const useCompanyStore = defineStore('companies', () => {
 
     const totalCompanies = ref<number>(0)
-    const totalJobs = ref<number>(0)
     const isLoading = ref<boolean>(true);
     const companies = ref<Array<Object>>([]);
 
@@ -28,17 +27,7 @@ export const useCompanyStore = defineStore('companies', () => {
         }
     };
 
-    const getAllJobs = async () => {
-        try {
-            const response = await axios.get('jobs');
-            totalJobs.value = response.data.length;
-        } catch (error) {
-            console.error('Error fetching jobs:', error);
-        } finally {
-            isLoading.value = false;
-        }
-    }
     return {
-        getAllCompanies, getAllJobs, totalCompanies, totalJobs, isLoading, companies
+        getAllCompanies, totalCompanies, isLoading, companies
     }
 })
