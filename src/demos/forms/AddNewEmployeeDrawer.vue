@@ -7,6 +7,7 @@ import { emailValidator, requiredValidator } from '../../@core/utils/validators'
 import { ref, nextTick, watchEffect, computed, onMounted } from 'vue';
 import { useCompanyStore } from '../../store/useCompanyStore'
 import { useEmployeesStore } from '../../store/useEmployeesStore'
+import { useAuthStore } from '../../store/useAuthStore'
 
 interface Emit {
   (e: 'closeDialog', value: Boolean): void
@@ -21,6 +22,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 const store = useCompanyStore()
 const eStore = useEmployeesStore()
+const aStore = useAuthStore()
 const isEditing = ref<Boolean>(false)
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
@@ -98,7 +100,11 @@ const onSubmit = async () => {
 };
 
 watchEffect(() => {
-  resisteredCompanies.value = store.companies.map(cmp => cmp.name);
+  if(aStore.userRole === 'admin'){
+    resisteredCompanies.value = store.companies.map(cmp => cmp.name);
+  }else{
+    resisteredCompanies.value = eStore.storedCmpName
+  }
 });
 
 watchEffect(() => {
@@ -116,7 +122,6 @@ watchEffect(() => {
 onMounted(() => {
   store.getAllCompanies()
 })
-
 </script>
 
 <template>
@@ -160,7 +165,7 @@ onMounted(() => {
 
               <!-- 👉 Employee Company -->
               <VCol cols="12" v-if="!props.employeeId">
-                <AppSelect label="Companies" :items="resisteredCompanies = null ? resisteredCompanies : eStore.storedCmpName" placeholder="Select Company"
+                <AppSelect label="Companies" :items="resisteredCompanies" placeholder="Select Company"
                   v-model="empData.company_name" required />
               </VCol>
 

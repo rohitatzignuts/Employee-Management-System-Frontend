@@ -11,6 +11,7 @@ import axios from 'axios'
 import router from '@/router'
 import { emailValidator, requiredValidator } from '../@core/utils/validators'
 import CryptoJS from 'crypto-js'
+import Swal from "sweetalert2";
 
 const refVForm = ref<VForm>()
 const loginData = ref({
@@ -23,11 +24,10 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
 const isPasswordVisible = ref(false)
 
-
 const handleLogin = async () => {
   try {
     const response = await axios.post('login', loginData.value)
-    if (response.data && response.data.access_token) {
+    if (response.status === 200) {
       localStorage.setItem("username", loginData.value.email)
       localStorage.setItem("access_token", response.data.access_token)
       router.push('/')
@@ -36,11 +36,17 @@ const handleLogin = async () => {
         id: response.data.company_id,
         name: response.data.company_name
       }), "company").toString())
-      loginData.value.email = ""
-      loginData.value.password = ""
-    }
-  } catch (error) {
-    console.log(error)
+    } 
+  } catch (response:any) {
+    Swal.fire({
+        title: `${response.message}` ?? "invalid Credentials",
+        icon: "error",
+        showConfirmButton: false,
+        timer: 1500
+      })
+  } finally {
+    loginData.value.email = ""
+    loginData.value.password = ""
   }
 }
 </script>
@@ -59,7 +65,7 @@ const handleLogin = async () => {
 
     <VCol cols="12" lg="4" class="auth-card-v2 d-flex align-center justify-center">
       <VCard flat :max-width="500" class="mt-12 mt-sm-0 pa-4">
-        <VCardText>
+        <VCardText class="pa-0">
           <h5 class="text-h5 mb-1">
             Welcome ! 👋🏻
           </h5>
@@ -69,7 +75,7 @@ const handleLogin = async () => {
           </p>
         </VCardText>
 
-        <VCardText>
+        <VCardText class="pa-0">
           <VForm ref="refVForm" @submit.prevent="handleLogin">
             <VRow>
               <!-- email -->
@@ -84,19 +90,12 @@ const handleLogin = async () => {
                   :type="isPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible" :rules="[requiredValidator]" />
-
-                <VBtn block type="submit" class="mt-8">
+              </VCol>
+              
+              <VCol cols="12" class="text-center">  
+                <VBtn block type="submit" class="mt-4">
                   Login
                 </VBtn>
-              </VCol>
-
-              <!-- create account -->
-              <VCol cols="12" class="text-center">
-                <span>New on our platform?</span>
-
-                <a class="text-primary ms-2" href="#">
-                  Create an account
-                </a>
               </VCol>
             </VRow>
           </VForm>

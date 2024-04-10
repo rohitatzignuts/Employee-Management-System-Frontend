@@ -24,7 +24,9 @@ const app = createApp(App)
 // Use plugins
 app.use(VueSweetalert2,options)
 app.use(vuetify)
-app.use(createPinia())
+const pinia = createPinia();
+app.use(pinia);
+
 app.use(router)
 app.use(layoutsPlugin)
 

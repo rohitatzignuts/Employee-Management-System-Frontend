@@ -2,8 +2,8 @@ import axios from 'axios';
 
 export const useCompanyStore = defineStore('companies', () => {
 
-    const totalCompanies = ref<number>()
-    const totalJobs = ref<number>()
+    const totalCompanies = ref<number>(0)
+    const totalJobs = ref<number>(0)
     const isLoading = ref<boolean>(true);
     const companies = ref<Array<Object>>([]);
 

@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { ref } from 'vue';
 import { useEmployeesStore } from '../../store/useEmployeesStore'
+import { useAuthStore } from '@/store/useAuthStore';
 
 const props = defineProps<{
   isDialogVisible: boolean,
@@ -14,6 +15,7 @@ const emit = defineEmits<{
 
 const deleteTypeRef = ref<'permanent' | 'temporary' | null>(null);
 const store = useEmployeesStore()
+const aStore = useAuthStore()
 
 const handleConfirm = () => {
   // Emit the event to indicate delete confirmation with the selected deleteType
@@ -40,7 +42,11 @@ const handleEmployeeDelete = async (employeeId: string | number) => {
         }
       );
       if (response.data.status == "200") {
-        store.getAllEmployees()
+        if(aStore.userRole === 'admin'){
+          store.getAllEmployees()
+        }else{
+          store.getCompanyEmployees()
+        }
         console.log("Employee deleted successfully")
         deleteTypeRef.value = null
       }

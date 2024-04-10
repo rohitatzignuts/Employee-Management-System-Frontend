@@ -4,14 +4,15 @@ import { useEmployeesStore } from '../store/useEmployeesStore'
 import { VDataTable } from "vuetify/labs/VDataTable"
 import AddNewEmployeeDrawer from "../demos/forms/AddNewEmployeeDrawer.vue"
 import DeleteEmployeeDialogBasic from '../demos/forms/DeleteEmployeeDialogBasic.vue'
-import CryptoJS from 'crypto-js';
+import { useAuthStore } from '@/store/useAuthStore'
 
-const userRole = CryptoJS.AES.decrypt(localStorage.getItem('userRole'), "role").toString(CryptoJS.enc.Utf8)
-const store = useEmployeesStore()
+
 const isAddNewUserDrawerVisible = ref<boolean>(false)
 const employeeEditid = ref<string | number | any>()
 const employeeDeleteid = ref<string | number | any>()
 const deleteCompanyDialog = ref<boolean>(false)
+const store = useEmployeesStore()
+const aStore = useAuthStore()
 
 const headers = [
     { title: "NAME", key: "first_name", },
@@ -27,7 +28,7 @@ const dialogClose = () => {
     isAddNewUserDrawerVisible.value = false
     employeeEditid.value = null
     store.getCompanyEmployees()
-    if(userRole === 'admin'){
+    if(aStore.userRole === 'admin'){
         store.getAllEmployees()
     }
 }
@@ -48,7 +49,7 @@ const handleEmployeeDelete = (employeeId: number) => {
 }
 
 onMounted(() => {
-    if(userRole === 'admin'){
+    if(aStore.userRole === 'admin'){
         store.getAllEmployees()
     }
     store.getCompanyEmployees()
@@ -66,7 +67,7 @@ onMounted(() => {
         <VDivider class="my-4" />
 
         <!-- show all employees of all the companies if user is Admin  -->
-        <div v-if="userRole === 'admin'">
+        <div v-if="aStore.userRole === 'admin'">
             <VDataTable :headers="headers" :items="store.employees" :items-per-page="10" class="pa-3">
                 <template #item.actions="{ item }">
                     <div class="d-flex gap-1">
@@ -88,7 +89,7 @@ onMounted(() => {
         <!--  -->
 
         <!-- show all employees of all a perticular company  -->
-        <div v-if="userRole === 'cmp_admin'">
+        <div v-if="aStore.userRole === 'cmp_admin'">
             <VDataTable :headers="headers" :items="store.cmpEmployees" :items-per-page="10" class="pa-3">
                 <template #item.actions="{ item }">
                     <div class="d-flex gap-1">

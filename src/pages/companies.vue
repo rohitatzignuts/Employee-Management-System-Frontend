@@ -6,13 +6,13 @@ import { ref, onMounted } from "vue";
 import { avatarText } from "@/@core/utils/formatters";
 import { useCompanyStore } from '../store/useCompanyStore'
 import misc404 from '@images/pages/404.png'
-import CryptoJS from 'crypto-js';
+import { useAuthStore } from "@/store/useAuthStore";
 
-const userRole = CryptoJS.AES.decrypt(localStorage.getItem('userRole'), "role").toString(CryptoJS.enc.Utf8)
 const isAddNewUserDrawerVisible = ref<boolean>(false);
 const companyEditId = ref<string | number | any>();
 const deleteCompanyDialog = ref<boolean>(false)
 const store = useCompanyStore()
+const aStore = useAuthStore()
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import miscMaskDark from '@images/pages/misc-mask-dark.png'
 import miscMaskLight from '@images/pages/misc-mask-light.png'
@@ -47,7 +47,7 @@ const dialogClose = () => {
 }
 
 onMounted(() => {
-  if (userRole === 'admin') {
+  if (aStore.userRole === 'admin') {
     store.getAllCompanies()
   }
 })
@@ -55,7 +55,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <div v-if="userRole === 'admin'">
+    <div v-if="aStore.userRole === 'admin'">
       <div class="d-flex align-center justify-space-between">
         <h1>Companies</h1>
         <VBtn prepend-icon="tabler-plus" @click="createCompany">
