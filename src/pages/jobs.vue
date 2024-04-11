@@ -1,7 +1,14 @@
-<script setup>
+<script setup lang="ts">
 import { VDataTable } from "vuetify/labs/VDataTable"
 import { useJobsStore } from '@/store/useJobsStore'
+import AddNewJobDrawer from '../demos/forms/AddNewJobDrawer.vue'
+import DeleteJobDialogBasic from '../demos/forms/DeleteJobDialogBasic.vue'
+import { ref } from "vue"
 
+const isAddNewUserDrawerVisible = ref<Boolean>(false)
+const jobEditid = ref<string | number | any>()
+const jobDeleteid = ref<string | number | any>()
+const deleteJobDialog = ref<boolean>(false)
 const jStore = useJobsStore()
 const headers = [
     { title: '', key: 'data-table-expand' },
@@ -9,7 +16,27 @@ const headers = [
     { title: "By", key: "company_name" },
     { title: "location", key: "location" },
     { title: "Actions", key: "actions" },
-];
+]
+
+const handleJobCreate = () => {
+    isAddNewUserDrawerVisible.value = true
+}
+
+const handleJobEdit = (id: string | number) => {
+    jobEditid.value = id
+    isAddNewUserDrawerVisible.value = true
+}
+
+const handleJobDelete = (id: string | number) => {
+    deleteJobDialog.value = true
+    jobDeleteid.value = id
+}
+
+const dialogClose = () => {
+    isAddNewUserDrawerVisible.value = false
+    jobEditid.value = null
+    jStore.getAllJobs()
+}
 
 onMounted(() => {
     jStore.getAllJobs()
@@ -20,7 +47,7 @@ onMounted(() => {
     <div>
         <div class="d-flex align-center justify-space-between">
             <h1>Jobs</h1>
-            <VBtn prepend-icon="tabler-plus" @click="handleEmployeeCreate">
+            <VBtn prepend-icon="tabler-plus" @click="handleJobCreate">
                 Add New Job
             </VBtn>
         </div>
@@ -40,14 +67,18 @@ onMounted(() => {
             </template>
             <template #item.actions="{ item }">
                 <div class="d-flex gap-1">
-                    <IconBtn @click="handleEmployeeEdit(item.props.title.id)">
+                    <IconBtn @click="handleJobEdit(item.raw.id)">
                         <VIcon icon="tabler-edit" />
                     </IconBtn>
-                    <IconBtn @click="handleEmployeeDelete(item.props.title.id)">
+                    <IconBtn @click="handleJobDelete(item.raw.id)">
                         <VIcon icon="tabler-trash" />
                     </IconBtn>
                 </div>
             </template>
         </VDataTable>
+        <AddNewJobDrawer :is-drawer-open="isAddNewUserDrawerVisible" @close-dialog="dialogClose"
+            :existing-job-id="jobEditid" />
+        <DeleteJobDialogBasic :isDialogVisible="deleteJobDialog" :delete-id="jobDeleteid"
+            @isDeleteDialogVisible="deleteJobDialog = false" />
     </div>
 </template>

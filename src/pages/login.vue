@@ -64,17 +64,17 @@ const handleLogin = async () => {
     </VCol>
 
     <VCol cols="12" lg="4" class="auth-card-v2 d-flex align-center justify-center">
-      <VCard flat :max-width="500" class="mt-12 mt-sm-0 pa-4">
+      <VCard flat :width="500" class="mt-12 mt-sm-0 pa-4">
         <VCardText class="pa-0">
           <h5 class="text-h5 mb-1">
             Welcome ! 👋🏻
           </h5>
 
-          <p class="mb-0">
+          <p>
             Please sign-in to your account...
           </p>
         </VCardText>
-
+        <VDivider class="py-2"/>
         <VCardText class="pa-0">
           <VForm ref="refVForm" @submit.prevent="handleLogin">
             <VRow>

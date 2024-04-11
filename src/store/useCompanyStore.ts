@@ -14,7 +14,7 @@ export const useCompanyStore = defineStore('companies', () => {
                     Authorization: `Bearer ${access_token}`,
                 }
             });
-            if (response.data.length > 0) {
+            if (response.data) {
                 companies.value = response.data;
                 totalCompanies.value = response.data.length;
             } else {

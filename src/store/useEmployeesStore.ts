@@ -20,6 +20,8 @@ export const useEmployeesStore = defineStore('employees', () => {
             }
         })
         employees.value = response.data
+        console.log(response.data);
+        
     }
 
     // get the employees of the logged in company admin

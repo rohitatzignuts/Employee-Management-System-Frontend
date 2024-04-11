@@ -26,7 +26,7 @@ const store = useAuthStore()
             <VListItemTitle class="font-weight-semibold">
               {{ store.username }}
             </VListItemTitle>
-            <VListItemSubtitle>{{ store.role }}</VListItemSubtitle>
+            <VListItemSubtitle>{{ store.userRole }}</VListItemSubtitle>
           </VListItem>
 
           <VDivider class="my-2" />
