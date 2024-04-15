@@ -2,6 +2,8 @@
 import axios from 'axios';
 import { ref } from 'vue';
 import { useJobsStore } from '../../store/useJobsStore'
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 const props = defineProps<{
   isDialogVisible: boolean,
@@ -41,12 +43,17 @@ const handleJobDelete = async (jobId: string | number) => {
       );
       if (response.data.status == "200") {
         store.getAllJobs()
-        console.log("Job deleted successfully")
+        store.getJobsByCompany()
+        toast(`${response.data.message}`, {
+          "type": "success",
+        })
         deleteTypeRef.value = null
       }
     }
   } catch (error: any) {
-    console.error("Error deleting Job:", error.message)
+    toast(`Error Deleting : ${error}`, {
+          "type": "success",
+        })
   }
 }
 </script>

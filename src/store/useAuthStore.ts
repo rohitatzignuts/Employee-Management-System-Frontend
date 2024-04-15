@@ -2,6 +2,8 @@ import axios from "axios";
 import CryptoJS from "crypto-js";
 import router from '@/router'
 import Swal from "sweetalert2";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 export const useAuthStore = defineStore("auth", () => {
     const userRole = CryptoJS.AES.decrypt(localStorage.getItem('userRole'), "role").toString(CryptoJS.enc.Utf8)
@@ -24,18 +26,13 @@ export const useAuthStore = defineStore("auth", () => {
             localStorage.removeItem("userRole");
             localStorage.removeItem("username");
             localStorage.removeItem("company");
-            Swal.fire({
-                title: "Logged Out Successfully!",
-                icon: "success",
-                showConfirmButton: false,
-                timer: 500,
+            toast("Logged Out Successfully !", {
+                "type": "success",
             });
-        } catch (error) {
-            Swal.fire({
-                title: `${error}`,
-                icon: "error",
-                showConfirmButton: false,
-                timer: 500,
+        } catch (error) {   
+            toast("Error Logging Out !", {
+                autoClose: 2000,
+                "type": "error",
             });
         }
     };

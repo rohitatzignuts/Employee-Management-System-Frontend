@@ -7,15 +7,17 @@ import { avatarText } from "@/@core/utils/formatters";
 import { useCompanyStore } from '../store/useCompanyStore'
 import misc404 from '@images/pages/404.png'
 import { useAuthStore } from "@/store/useAuthStore";
+import { useDebounceFn } from '@vueuse/core'
+import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
+import miscMaskDark from '@images/pages/misc-mask-dark.png'
+import miscMaskLight from '@images/pages/misc-mask-light.png'
 
 const isAddNewUserDrawerVisible = ref<boolean>(false);
 const companyEditId = ref<string | number | any>();
 const deleteCompanyDialog = ref<boolean>(false)
+const searchQuery = ref<string>(' ')
 const store = useCompanyStore()
 const aStore = useAuthStore()
-import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import miscMaskDark from '@images/pages/misc-mask-dark.png'
-import miscMaskLight from '@images/pages/misc-mask-light.png'
 
 const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
 const headers = [
@@ -30,6 +32,7 @@ const createCompany = () => {
   isAddNewUserDrawerVisible.value = true;
   companyEditId.value = null;
 };
+
 const handleEditCompany = (companyId: string | number) => {
   isAddNewUserDrawerVisible.value = true;
   companyEditId.value = companyId;
@@ -46,10 +49,12 @@ const dialogClose = () => {
   store.getAllCompanies()
 }
 
+const handleSearch = useDebounceFn(() => {
+  store.getAllCompanies(searchQuery.value)
+}, 500)
+
 onMounted(() => {
-  if (aStore.userRole === 'admin') {
-    store.getAllCompanies()
-  }
+  store.getAllCompanies()
 })
 </script>
 
@@ -63,6 +68,13 @@ onMounted(() => {
         </VBtn>
       </div>
       <VDivider class="my-4" />
+
+      <!-- 👉 Search  -->
+      <div class="invoice-list-search">
+        <AppTextField placeholder="Search By Name" density="compact" class="my-2" v-model="searchQuery"
+          @input="handleSearch" />
+      </div>
+
       <VDataTable :headers="headers" :items="store.companies" :items-per-page="10" class="pa-3">
 
         <template #item.is_active="{ item }">
@@ -113,10 +125,10 @@ onMounted(() => {
       <div class="misc-avatar w-100 text-center">
         <VCard class="pa-4">
           <VCardTitle class="font-weight-bold">Unauthorized</VCardTitle>
-          <VDivider/>
+          <VDivider />
           <VImg :src="misc404" alt="Coming Soon" :max-width="200" class="mx-auto py-4" />
         </VCard>
       </div>
     </div>
-    </div>
+  </div>
 </template>

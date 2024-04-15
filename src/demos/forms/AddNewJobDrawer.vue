@@ -2,12 +2,14 @@
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import type { VForm } from 'vuetify/components/VForm'
-import axios from 'axios';
+import axios from 'axios'
 import { emailValidator, requiredValidator } from '../../@core/utils/validators'
-import { ref, nextTick, watchEffect, onMounted } from 'vue';
+import { ref, nextTick, watchEffect, onMounted } from 'vue'
 import { useCompanyStore } from '../../store/useCompanyStore'
 import { useEmployeesStore } from '../../store/useEmployeesStore'
 import { useAuthStore } from '../../store/useAuthStore'
+import { toast } from 'vue3-toastify'
+import 'vue3-toastify/dist/index.css'
 
 interface Emit {
   (e: 'closeDialog', value: Boolean): void
@@ -27,14 +29,15 @@ const isEditing = ref<Boolean>(false)
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const getEmployeeId = ref<string | number | null>(props.existingJobId ?? null)
-let resisteredCompanies = ref([]);
+let resisteredCompanies = ref([])
 
 const jobData = ref({
   "title": "",
   "description": "",
   "location": "",
   "pay": "",
-  "company_name" : ""
+  "company_name": "",
+  "is_active" : false
 })
 
 // 👉 drawer close
@@ -57,53 +60,73 @@ const getJobData = async (jobId: string | number) => {
         Authorization: `Bearer ${access_token}`,
       }
     })
-    jobData.value.title = response.data.title ;
-    jobData.value.description = response.data.description;
-    jobData.value.location = response.data.location;
-    jobData.value.pay = response.data.pay;
+    jobData.value.title = response.data.title
+    jobData.value.description = response.data.description
+    jobData.value.location = response.data.location
+    jobData.value.pay = response.data.pay
+    jobData.value.company_name = response.data.company_name
     getEmployeeId.value = null
+    if (response.data.company.is_active) {
+      jobData.value.is_active = true
+    } else {
+      jobData.value.is_active = false
+    }
   } catch (error) {
-    console.error("Error Getting data:", error);
+    console.error("Error Getting data:", error)
   }
 }
 
 // 👉 edit existig company and create a new company
 const onSubmit = async () => {
   try {
-    let input = {
-      'title': jobData.value.title,
-      'description': jobData.value.description,
-      'location': jobData.value.location,
-      'pay': jobData.value.pay,
-      'company_name': jobData.value.company_name,
-    }
-    isEditing.value = props.existingJobId ? true : false
-    const url = props.existingJobId ? `job/update/${props.existingJobId}` : `job/create`
-    const response = await axios.post(url, input, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    refForm.value?.validate().then(async (res) => {
+      if (res.valid) {
+        let input = {
+          'title': jobData.value.title,
+          'description': jobData.value.description,
+          'is_active': jobData.value.is_active ? 1 : 0,
+          'location': jobData.value.location,
+          'pay': jobData.value.pay,
+          'company_name': jobData.value.company_name,
+        }
+        isEditing.value = props.existingJobId ? true : false
+        const url = props.existingJobId ? `job/update/${props.existingJobId}` : `job/create`
+        const response = await axios.post(url, input, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          }
+        })
+        if (response.data.status == '200') {
+          isEditing.value = false
+          toast(`${response.data.message}`, {
+            "type": "success",
+          })
+          console.log(response.data.message)
+          closeNavigationDrawer()
+        } else {
+          toast(`${response.data.message}`, {
+            "type": "error",
+          })
+          refForm.value?.reset()
+          refForm.value?.resetValidation()
+        }
       }
-    });
-    if (response.data.status == '200') {
-      isEditing.value = false
-      console.log(response.data.message)
-      closeNavigationDrawer()
-    } else {
-      refForm.value?.reset()
-      refForm.value?.resetValidation()
-    }
+    })
+
   } catch (error) {
-    console.error("Error submitting data:", error)
+    toast(`${error}`, {
+      "type": "error",
+    })
   }
-};
+}
 
 watchEffect(() => {
-  if(aStore.userRole === 'admin'){
-    resisteredCompanies.value = store.companies.map(cmp => cmp.name);
-  }else{
+  if (aStore.userRole === 'admin') {
+    resisteredCompanies.value = store.companies.map(cmp => cmp.name)
+  } else {
     resisteredCompanies.value = eStore.storedCmpName
   }
-});
+})
 
 watchEffect(() => {
   if (props.existingJobId) {
@@ -146,8 +169,8 @@ onMounted(() => {
 
               <!-- 👉 Job location -->
               <VCol cols="12">
-                <AppTextField v-model="jobData.location" type="email" :rules="[requiredValidator]"
-                  label="Job Location" placeholder="Job Location" />
+                <AppTextField v-model="jobData.location" type="email" :rules="[requiredValidator]" label="Job Location"
+                  placeholder="Job Location" />
               </VCol>
 
               <!-- 👉 Job pay -->
@@ -157,9 +180,15 @@ onMounted(() => {
               </VCol>
 
               <!-- 👉From Company -->
-              <VCol cols="12" v-if="!props.existingJobId">
+              <VCol cols="12">
                 <AppSelect label="Companies" :items="resisteredCompanies" placeholder="Select Company"
-                  v-model="jobData.company_name" required />
+                  v-model="jobData.company_name" required 
+                  :rules="[requiredValidator]" :disabled="props.existingJobId"/>
+              </VCol>
+
+              <!-- 👉 Job Status -->
+              <VCol cols="12" v-if="props.existingJobId">
+                <VSwitch label="Active" v-model="jobData.is_active" />
               </VCol>
 
               <!-- 👉 Submit and Cancel -->

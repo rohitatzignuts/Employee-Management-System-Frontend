@@ -5,6 +5,8 @@ import type { VForm } from 'vuetify/components/VForm'
 import axios from 'axios';
 import { emailValidator, requiredValidator } from '../../@core/utils/validators'
 import { ref, nextTick, watchEffect } from 'vue';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 interface Emit {
   (e: 'closeDialog', value: Boolean): void
@@ -19,8 +21,8 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 
 const logoFile = ref<string | null>('')
-const isEditing = ref<Boolean>(false)
-const isFormValid = ref<Boolean>(false)
+const isEditing = ref<boolean>(false)
+const isFormValid = ref<boolean>(false)
 const refForm = ref<VForm>()
 const getCompanyId = ref<string | number | null>(props.companyId ?? null)
 
@@ -37,7 +39,6 @@ const cmpAdminData = ref({
   'first_name': '',
   'last_name': '',
   'email': '',
-  'password': '',
   'joining_date': '',
 })
 
@@ -82,39 +83,46 @@ const getCompanyData = async (comId: string | number) => {
 // 👉 edit existig company and create a new company
 const onSubmit = async () => {
   try {
-    const formData = new FormData()
-    formData.append('logo', logoFile.value);
-    let input = {
-      'logo': logoFile.value,
-      'name': companyData.value.name,
-      'website': companyData.value.website,
-      'cmp_email': companyData.value.cmp_email,
-      'location': companyData.value.location,
-      'is_active': companyData.value.is_active ? 1 : 0,
-      'first_name': cmpAdminData.value.first_name,
-      'last_name': cmpAdminData.value.last_name,
-      'email': cmpAdminData.value.email,
-      'password': cmpAdminData.value.password,
-      'joining_date': cmpAdminData.value.joining_date,
-    }
-    isEditing.value = props.companyId ? true : false
-    const url = props.companyId ? `company/update/${props.companyId}` : `company/create`
-    const response = await axios.post(url, input, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        'content-type': 'multipart/form-data'
+    refForm.value?.validate().then(async (res) => {
+      if(res.valid){
+        const formData = new FormData()
+        formData.append('logo', logoFile.value);
+        let input = {
+          'logo': logoFile.value,
+          'name': companyData.value.name,
+          'website': companyData.value.website,
+          'cmp_email': companyData.value.cmp_email,
+          'location': companyData.value.location,
+          'is_active': companyData.value.is_active ? 1 : 0,
+          'first_name': cmpAdminData.value.first_name,
+          'last_name': cmpAdminData.value.last_name,
+          'email': cmpAdminData.value.email,
+          'joining_date': cmpAdminData.value.joining_date,
+        }
+        isEditing.value = props.companyId ? true : false
+        const url = props.companyId ? `company/update/${props.companyId}` : `company/create`
+        const response = await axios.post(url, input, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            'content-type': 'multipart/form-data'
+          }
+        });
+        if (response) {
+          toast(`${response.data.message}`, {
+            "type": "success",
+          })
+          isEditing.value = false
+          closeNavigationDrawer()
+        } else {
+          refForm.value?.reset()
+          refForm.value?.resetValidation()
+        }
       }
-    });
-    if (response.data.status == '200') {
-      isEditing.value = false
-      console.log(response.data.message)
-      closeNavigationDrawer()
-    } else {
-      refForm.value?.reset()
-      refForm.value?.resetValidation()
-    }
-  } catch (error) {
-    console.error("Error submitting data:", error)
+    })
+  } catch (error : any) {
+    toast(`Error Creating Company : ${error.message}`, {
+        "type": "error",
+      })
   }
 };
 
@@ -193,12 +201,6 @@ watchEffect(() => {
               <VCol cols="12">
                 <AppDateTimePicker v-model="cmpAdminData.joining_date" label="Company Admin Joining Date"
                   placeholder="Select Joining date" :rules="[requiredValidator]" />
-              </VCol>
-
-              <!-- 👉 Company Admin password -->
-              <VCol cols="12" v-if="!props.companyId">
-                <AppTextField v-model="cmpAdminData.password" type="password" :rules="[requiredValidator]"
-                  label="Company Admin password" />
               </VCol>
 
               <!-- 👉 Company Status -->

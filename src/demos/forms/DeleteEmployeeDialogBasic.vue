@@ -3,6 +3,8 @@ import axios from 'axios';
 import { ref } from 'vue';
 import { useEmployeesStore } from '../../store/useEmployeesStore'
 import { useAuthStore } from '@/store/useAuthStore';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 const props = defineProps<{
   isDialogVisible: boolean,
@@ -42,17 +44,21 @@ const handleEmployeeDelete = async (employeeId: string | number) => {
         }
       );
       if (response.data.status == "200") {
-        if(aStore.userRole === 'admin'){
+        if (aStore.userRole === 'admin') {
           store.getAllEmployees()
-        }else{
+        } else {
           store.getCompanyEmployees()
         }
-        console.log("Employee deleted successfully")
+        toast(`${response.data.message}`, {
+          "type": "success",
+        })
         deleteTypeRef.value = null
       }
     }
   } catch (error: any) {
-    console.error("Error deleting Employee:", error.message)
+    toast(`Error Deleting : ${error}`, {
+        "type": "success",
+      })
   }
 }
 </script>
@@ -67,8 +73,8 @@ const handleEmployeeDelete = async (employeeId: string | number) => {
     <VCard title="How do you want to delete this record ?">
       <VForm @submit.prevent="handleEmployeeDelete(props.employeeId)">
         <VCardText class="demo-space-x">
-          <VCheckbox v-model="deleteTypeRef" value="permanent" label="Permanently" name="deleteType" required/>
-          <VCheckbox v-model="deleteTypeRef" value="temporary" label="Temporarily" name="deleteType" required/>
+          <VCheckbox v-model="deleteTypeRef" value="permanent" label="Permanently" name="deleteType" required />
+          <VCheckbox v-model="deleteTypeRef" value="temporary" label="Temporarily" name="deleteType" required />
         </VCardText>
         <VCardText class="d-flex justify-end gap-2">
           <VBtn @click="handleConfirm" type="submit">

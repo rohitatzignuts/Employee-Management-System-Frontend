@@ -20,8 +20,6 @@ export const useEmployeesStore = defineStore('employees', () => {
             }
         })
         employees.value = response.data
-        console.log(response.data);
-        
     }
 
     // get the employees of the logged in company admin
@@ -32,8 +30,9 @@ export const useEmployeesStore = defineStore('employees', () => {
                 Authorization: `Bearer ${access_token}`,
             }
         })
-        cmpEmployees.value = response.data
-        cmpEmployeeCount.value = response.data.length
+        
+        cmpEmployees.value = response.data.data
+        cmpEmployeeCount.value = response.data.data.length
     }
 
     return {

@@ -102,6 +102,13 @@ const handlePasswordReset = async () => {
                   Reset Password
                 </VBtn>
               </VCol>
+              <VCol cols="12">
+                <RouterLink to="/">
+                  <VBtn block type="submit" class="mt-1">
+                    Cancel
+                  </VBtn>
+                </RouterLink>
+              </VCol>
             </VRow>
           </VForm>
         </VCardText>

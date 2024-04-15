@@ -2,6 +2,8 @@
 import axios from 'axios';
 import { ref } from 'vue';
 import { useCompanyStore } from '../../store/useCompanyStore'
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 const props = defineProps<{
   isDialogVisible: boolean,
@@ -41,12 +43,16 @@ const handleCompanyDelete = async (companyId: string | number) => {
       );
       if (response.data.status == "200") {
         store.getAllCompanies()
-        console.log("Company deleted successfully")
+        toast(`${response.data.message}`, {
+        "type": "success",
+      })
         deleteTypeRef.value = null
       }
     }
   } catch (error: any) {
-    console.error("Error deleting company:", error.message)
+    toast(`Error Deleting : ${error}`, {
+        "type": "success",
+      })
   }
 }
 </script>

@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref, watchEffect } from 'vue'
-import { useEmployeesStore } from '../store/useEmployeesStore'
+import { useEmployeesStore } from '@/store/useEmployeesStore'
 import { VDataTable } from "vuetify/labs/VDataTable"
-import AddNewEmployeeDrawer from "../demos/forms/AddNewEmployeeDrawer.vue"
-import DeleteEmployeeDialogBasic from '../demos/forms/DeleteEmployeeDialogBasic.vue'
+import AddNewEmployeeDrawer from "@/demos/forms/AddNewEmployeeDrawer.vue"
+import DeleteEmployeeDialogBasic from '@/demos/forms/DeleteEmployeeDialogBasic.vue'
 import { useAuthStore } from '@/store/useAuthStore'
-
 
 const isAddNewUserDrawerVisible = ref<boolean>(false)
 const employeeEditid = ref<string | number | any>()
@@ -22,7 +21,7 @@ const headers = [
     { title: "ROLE", key: "role" },
     { title: "JOINING DATE", key: "joining_date" },
     { title: "Actions", key: "actions" },
-];
+]
 
 const dialogClose = () => {
     isAddNewUserDrawerVisible.value = false
@@ -34,18 +33,18 @@ const dialogClose = () => {
 }
 
 const handleEmployeeCreate = () => {
-    isAddNewUserDrawerVisible.value = true;
-    employeeEditid.value = null;
+    isAddNewUserDrawerVisible.value = true
+    employeeEditid.value = null
 }
 
 const handleEmployeeEdit = (employeeId: number) => {
     employeeEditid.value = employeeId
-    isAddNewUserDrawerVisible.value = true;
+    isAddNewUserDrawerVisible.value = true
 }
 
 const handleEmployeeDelete = (employeeId: number) => {
     employeeDeleteid.value = employeeId
-    deleteCompanyDialog.value = true;
+    deleteCompanyDialog.value = true
 }
 
 onMounted(() => {
@@ -53,7 +52,7 @@ onMounted(() => {
         store.getAllEmployees()
     }
     store.getCompanyEmployees()
-});
+})
 </script>
 
 <template>

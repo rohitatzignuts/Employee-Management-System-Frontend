@@ -8,6 +8,8 @@ import { ref, nextTick, watchEffect, computed, onMounted } from 'vue';
 import { useCompanyStore } from '../../store/useCompanyStore'
 import { useEmployeesStore } from '../../store/useEmployeesStore'
 import { useAuthStore } from '../../store/useAuthStore'
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 interface Emit {
   (e: 'closeDialog', value: Boolean): void
@@ -33,7 +35,6 @@ const empData = ref({
   "first_name": "",
   "last_name": "",
   "email": "",
-  "password": "",
   "joining_date": "",
   "company_name": ""
 })
@@ -58,10 +59,11 @@ const getEmployeeData = async (empId: string | number) => {
         Authorization: `Bearer ${access_token}`,
       }
     })
-    empData.value.first_name = response.data.employee.first_name;
-    empData.value.last_name = response.data.employee.last_name;
-    empData.value.email = response.data.employee.email;
-    empData.value.joining_date = response.data.employee.joining_date;
+    empData.value.first_name = response.data.data.first_name;
+    empData.value.last_name = response.data.data.last_name;
+    empData.value.email = response.data.data.email;
+    empData.value.joining_date = response.data.data.joining_date;
+    empData.value.company_name = response.data.data.company_name;
     getEmployeeId.value = null
   } catch (error) {
     console.error("Error Getting data:", error);
@@ -71,38 +73,49 @@ const getEmployeeData = async (empId: string | number) => {
 // 👉 edit existig company and create a new company
 const onSubmit = async () => {
   try {
-    let input = {
-      'first_name': empData.value.first_name,
-      'last_name': empData.value.last_name,
-      'email': empData.value.email,
-      'password': empData.value.password,
-      'company_name': empData.value.company_name,
-      'joining_date': empData.value.joining_date,
-    }
-    isEditing.value = props.employeeId ? true : false
-    const url = props.employeeId ? `employee/update/${props.employeeId}` : `employee/create`
-    const response = await axios.post(url, input, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    refForm.value?.validate().then(async (res) => {
+      if (res.valid){
+        let input = {
+          'first_name': empData.value.first_name,
+          'last_name': empData.value.last_name,
+          'email': empData.value.email,
+          'company_name': empData.value.company_name,
+          'joining_date': empData.value.joining_date,
+        }
+        isEditing.value = !!props.employeeId;
+        const url = props.employeeId ? `employee/update/${props.employeeId}` : `employee/create`;
+        const response = await axios.post(url, input, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          }
+        });
+        if (response) {
+          isEditing.value = false;
+          toast(`${response.data.message}`, {
+            "type": "success",
+          });
+          closeNavigationDrawer();
+        } else {
+          toast(`${response.data.message}`, {
+            "type": "error",
+          });
+          refForm.value?.reset();
+          refForm.value?.resetValidation();
+        }
       }
-    });
-    if (response.data.status == '200') {
-      isEditing.value = false
-      console.log(response.data.message)
-      closeNavigationDrawer()
-    } else {
-      refForm.value?.reset()
-      refForm.value?.resetValidation()
-    }
+    })
   } catch (error) {
-    console.error("Error submitting data:", error)
+    toast(`${error}`, {
+      "type": "error",
+    })
   }
 };
 
+
 watchEffect(() => {
-  if(aStore.userRole === 'admin'){
+  if (aStore.userRole === 'admin') {
     resisteredCompanies.value = store.companies.map(cmp => cmp.name);
-  }else{
+  } else {
     resisteredCompanies.value = eStore.storedCmpName
   }
 });
@@ -157,16 +170,10 @@ onMounted(() => {
                   :rules="[requiredValidator]" />
               </VCol>
 
-              <!-- 👉 Employee  password -->
-              <VCol cols="12" v-if="!props.employeeId">
-                <AppTextField v-model="empData.password" type="password" :rules="[requiredValidator]"
-                  label="Employee password" placeholder="Employee password" />
-              </VCol>
-
               <!-- 👉 Employee Company -->
-              <VCol cols="12" v-if="!props.employeeId">
+              <VCol cols="12">
                 <AppSelect label="Companies" :items="resisteredCompanies" placeholder="Select Company"
-                  v-model="empData.company_name" required />
+                  v-model="empData.company_name" :rules="[requiredValidator]" :disabled="props.employeeId"/>
               </VCol>
 
               <!-- 👉 Submit and Cancel -->

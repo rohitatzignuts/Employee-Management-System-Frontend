@@ -11,7 +11,8 @@ import axios from 'axios'
 import router from '@/router'
 import { emailValidator, requiredValidator } from '../@core/utils/validators'
 import CryptoJS from 'crypto-js'
-import Swal from "sweetalert2";
+import { toast } from 'vue3-toastify'
+import 'vue3-toastify/dist/index.css'
 
 const refVForm = ref<VForm>()
 const loginData = ref({
@@ -26,29 +27,35 @@ const isPasswordVisible = ref(false)
 
 const handleLogin = async () => {
   try {
-    const response = await axios.post('login', loginData.value)
-    if (response.status === 200) {
-      localStorage.setItem("username", loginData.value.email)
-      localStorage.setItem("access_token", response.data.access_token)
-      router.push('/')
-      localStorage.setItem("userRole", CryptoJS.AES.encrypt(response.data.role, "role").toString())
-      localStorage.setItem("company", CryptoJS.AES.encrypt(JSON.stringify({
-        id: response.data.company_id,
-        name: response.data.company_name
-      }), "company").toString())
-    } 
-  } catch (response:any) {
-    Swal.fire({
-        title: `${response.message}` ?? "invalid Credentials",
-        icon: "error",
-        showConfirmButton: false,
-        timer: 1500
-      })
-  } finally {
-    loginData.value.email = ""
-    loginData.value.password = ""
+    refVForm.value?.validate().then(async (res) => {
+      if(res.valid){
+        const response = await axios.post('login', loginData.value)
+        if(response){
+          localStorage.setItem("username", loginData.value.email)
+          localStorage.setItem("access_token", response.data.access_token)
+          localStorage.setItem("userRole", CryptoJS.AES.encrypt(response.data.role, "role").toString())
+          localStorage.setItem("company", CryptoJS.AES.encrypt(JSON.stringify({
+            id: response.data.company_id,
+            name: response.data.company_name
+          }), "company").toString())
+          toast(`Logged in !!`, {
+            "type": "success",
+          })
+          router.push('/')
+        }else{
+          toast(`Error while Logging in`, {
+          "type": "error",
+        })
+        }
+      }
+    })
+  } catch (error :any) {
+    toast(`Error while Logging in : ${error}`, {
+      "type": "error",
+    })
   }
 }
+
 </script>
 
 <template>
@@ -74,7 +81,7 @@ const handleLogin = async () => {
             Please sign-in to your account...
           </p>
         </VCardText>
-        <VDivider class="py-2"/>
+        <VDivider class="py-2" />
         <VCardText class="pa-0">
           <VForm ref="refVForm" @submit.prevent="handleLogin">
             <VRow>
@@ -91,8 +98,8 @@ const handleLogin = async () => {
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible" :rules="[requiredValidator]" />
               </VCol>
-              
-              <VCol cols="12" class="text-center">  
+
+              <VCol cols="12" class="text-center">
                 <VBtn block type="submit" class="mt-4">
                   Login
                 </VBtn>
