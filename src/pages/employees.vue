@@ -10,6 +10,8 @@ const isAddNewUserDrawerVisible = ref<boolean>(false)
 const employeeEditid = ref<string | number | any>()
 const employeeDeleteid = ref<string | number | any>()
 const deleteCompanyDialog = ref<boolean>(false)
+const searchQuery = ref<string>('')
+
 const store = useEmployeesStore()
 const aStore = useAuthStore()
 
@@ -27,7 +29,7 @@ const dialogClose = () => {
     isAddNewUserDrawerVisible.value = false
     employeeEditid.value = null
     store.getCompanyEmployees()
-    if(aStore.userRole === 'admin'){
+    if (aStore.userRole === 'admin') {
         store.getAllEmployees()
     }
 }
@@ -47,8 +49,15 @@ const handleEmployeeDelete = (employeeId: number) => {
     deleteCompanyDialog.value = true
 }
 
+const handleSearch = useDebounceFn(() => {
+    if (aStore.userRole === 'admin') {
+        store.getAllEmployees(searchQuery.value)
+    }
+    store.getCompanyEmployees(searchQuery.value)
+}, 500)
+
 onMounted(() => {
-    if(aStore.userRole === 'admin'){
+    if (aStore.userRole === 'admin') {
         store.getAllEmployees()
     }
     store.getCompanyEmployees()
@@ -65,6 +74,12 @@ onMounted(() => {
         </div>
         <VDivider class="my-4" />
 
+        <!-- 👉 Search  -->
+        <div class="invoice-list-search">
+            <AppTextField placeholder="Search By First Name" density="compact" class="my-2" v-model="searchQuery"
+                @input="handleSearch" prepend-inner-icon="tabler-search" />
+        </div>
+        
         <!-- show all employees of all the companies if user is Admin  -->
         <div v-if="aStore.userRole === 'admin'">
             <VDataTable :headers="headers" :items="store.employees" :items-per-page="10" class="pa-3">
@@ -106,7 +121,7 @@ onMounted(() => {
                     </VChip>
                 </template>
                 <template #item.company_name="{ item }">
-                    {{store.storedCmpName[0]}}
+                    {{ store.storedCmpName[0] }}
                 </template>
             </VDataTable>
         </div>

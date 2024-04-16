@@ -9,9 +9,9 @@ export const useJobsStore = defineStore("jobs", () => {
     const totalJobsCount = ref<number>(0)
     const totalJobsCountByCompany = ref<number>(0)
 
-    const getAllJobs = async () => {
+    const getAllJobs = async (term: string | null = '') => {
         try {
-            const response = await axios.get('jobs')
+            const response = await axios.get(`jobs/search?term=${term}`)
             totaljobs.value = response.data
             totalJobsCount.value = response.data.length
         } catch (error) {
@@ -21,11 +21,11 @@ export const useJobsStore = defineStore("jobs", () => {
         }
     }
 
-    const getJobsByCompany = async () => {
+    const getJobsByCompany = async (term: string | null = '') => {
         const access_token = localStorage.getItem("access_token");
         const company_id = eStore.storedCmpId
         try {
-            const response = await axios.get(`${company_id}/jobs`,{
+            const response = await axios.get(`${company_id}/jobs/search?term=${term}`,{
                 headers : {
                     Authorization: `Bearer ${access_token}`,
                 }

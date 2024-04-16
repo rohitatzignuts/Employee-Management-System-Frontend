@@ -26,34 +26,44 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 const isPasswordVisible = ref(false)
 
 const handleLogin = async () => {
-  try {
-    refVForm.value?.validate().then(async (res) => {
-      if(res.valid){
-        const response = await axios.post('login', loginData.value)
-        if(response){
+  refVForm.value?.validate().then(async (res) => {
+    if (res.valid) {
+      try {
+        const response = await axios.post("login", loginData.value)
+        if (response) {
           localStorage.setItem("username", loginData.value.email)
           localStorage.setItem("access_token", response.data.access_token)
-          localStorage.setItem("userRole", CryptoJS.AES.encrypt(response.data.role, "role").toString())
-          localStorage.setItem("company", CryptoJS.AES.encrypt(JSON.stringify({
-            id: response.data.company_id,
-            name: response.data.company_name
-          }), "company").toString())
+          localStorage.setItem(
+            "userRole",
+            CryptoJS.AES.encrypt(response.data.role, "role").toString()
+          )
+          localStorage.setItem(
+            "company",
+            CryptoJS.AES.encrypt(
+              JSON.stringify({
+                id: response.data.company_id,
+                name: response.data.company_name,
+              }),
+              "company"
+            ).toString()
+          )
           toast(`Logged in !!`, {
-            "type": "success",
+            type: "success",
           })
-          router.push('/')
-        }else{
-          toast(`Error while Logging in`, {
-          "type": "error",
+          router.push("/")
+        }
+      } catch (e: any) {
+        toast(`Invalid Credentials : ${e.message}`, {
+          type: "error",
         })
+      } finally {
+        loginData.value = {
+          email: '',
+          password: '',
         }
       }
-    })
-  } catch (error :any) {
-    toast(`Error while Logging in : ${error}`, {
-      "type": "error",
-    })
-  }
+    }
+  })
 }
 
 </script>

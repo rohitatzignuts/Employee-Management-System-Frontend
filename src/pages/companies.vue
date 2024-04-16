@@ -15,7 +15,7 @@ import miscMaskLight from '@images/pages/misc-mask-light.png'
 const isAddNewUserDrawerVisible = ref<boolean>(false);
 const companyEditId = ref<string | number | any>();
 const deleteCompanyDialog = ref<boolean>(false)
-const searchQuery = ref<string>(' ')
+const searchQuery = ref<string>('')
 const store = useCompanyStore()
 const aStore = useAuthStore()
 
@@ -72,7 +72,7 @@ onMounted(() => {
       <!-- 👉 Search  -->
       <div class="invoice-list-search">
         <AppTextField placeholder="Search By Name" density="compact" class="my-2" v-model="searchQuery"
-          @input="handleSearch" />
+          @input="handleSearch" prepend-inner-icon="tabler-search"/>
       </div>
 
       <VDataTable :headers="headers" :items="store.companies" :items-per-page="10" class="pa-3">
@@ -82,7 +82,7 @@ onMounted(() => {
             <VChip color="success" v-if="item.props.title.is_active == 1">
               active
             </VChip>
-            <VChip color="secondary" v-else> closed </VChip>
+            <VChip color="secondary" v-else> in-active </VChip>
           </div>
         </template>
 

@@ -7,7 +7,7 @@ export const useCompanyStore = defineStore('companies', () => {
     const companies = ref<Array<Object>>([])
     const access_token = localStorage.getItem("access_token")
 
-    const getAllCompanies = async (term: string | null = null) => {
+    const getAllCompanies = async (term: string | null = '') => {
         try {
             const response = await axios.get(`companies/search?term=${term}`, {
                 headers: {

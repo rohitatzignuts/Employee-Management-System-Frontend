@@ -10,6 +10,7 @@ const isAddNewUserDrawerVisible = ref<Boolean>(false)
 const jobEditid = ref<string | number | any>()
 const jobDeleteid = ref<string | number | any>()
 const deleteJobDialog = ref<boolean>(false)
+const searchQuery = ref<string>('')
 const jStore = useJobsStore()
 const aStore = useAuthStore()
 
@@ -45,6 +46,13 @@ const dialogClose = () => {
     jStore.getJobsByCompany()
 }
 
+const handleSearch = useDebounceFn(() => {
+    if (aStore.userRole === 'admin') {
+        jStore.getAllJobs(searchQuery.value)
+    }
+    jStore.getJobsByCompany(searchQuery.value)
+}, 500)
+
 onMounted(() => {
     if (aStore.userRole === 'admin') {
         jStore.getAllJobs()
@@ -62,6 +70,13 @@ onMounted(() => {
             </VBtn>
         </div>
         <VDivider class="my-4" />
+
+        <!-- 👉 Search  -->
+        <div class="invoice-list-search">
+            <AppTextField placeholder="Search By Job Title" density="compact" class="my-2" v-model="searchQuery"
+                @input="handleSearch" prepend-inner-icon="tabler-search" />
+        </div>
+
         <div v-if="aStore.userRole === 'admin'">
             <VDataTable :headers="headers" :items="jStore.totaljobs" :items-per-page="10" class="pa-3" expand-on-click>
                 <template #expanded-row="slotProps">
@@ -87,7 +102,7 @@ onMounted(() => {
                         </VChip>
                     </div>
                 </template>
-                
+
                 <template #item.actions="{ item }">
                     <div class="d-flex gap-1">
                         <IconBtn @click="handleJobEdit(item.raw.id)">

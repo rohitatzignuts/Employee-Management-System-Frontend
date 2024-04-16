@@ -12,29 +12,37 @@ export const useEmployeesStore = defineStore('employees', () => {
     const cmpEmployeeCount = ref<number>()
 
     // get all the employees ( super admin )
-    const getAllEmployees = async () => {
+    const getAllEmployees = async (term: string | null = '') => {
         const access_token = localStorage.getItem("access_token");
-        const response = await axios.get('employees', {
-            headers: {
-                Authorization: `Bearer ${access_token}`,
-            }
-        })
-        employees.value = response.data
-    }
+        try {
+            const response = await axios.get(`employees/search?term=${term}`, {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                }
+            });
+            employees.value = response.data;
+        } catch (error) {
+            console.error('Error fetching employees:', error);
+        }
+    };
+    
 
     // get the employees of the logged in company admin
-    const getCompanyEmployees = async () => {
+    const getCompanyEmployees = async (term: string | null = '') => {
         const access_token = localStorage.getItem("access_token");
-        const response = await axios.get(`${storedCmpId}/employees`, {
-            headers: {
-                Authorization: `Bearer ${access_token}`,
-            }
-        })
-        
-        cmpEmployees.value = response.data.data
-        cmpEmployeeCount.value = response.data.data.length
-    }
-
+        try {
+            const response = await axios.get(`${storedCmpId}/employees/search?term=${term}`, {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                }
+            });
+            cmpEmployees.value = response.data.data;
+            cmpEmployeeCount.value = response.data.data.length;
+        } catch (error) {
+            console.error('Error fetching company employees:', error);
+        }
+    };
+    
     return {
         getAllEmployees,employees,getCompanyEmployees,cmpEmployees,storedCmpId,storedCmpName,cmpEmployeeCount
     }
