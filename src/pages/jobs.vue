@@ -5,6 +5,7 @@ import AddNewJobDrawer from '../demos/forms/AddNewJobDrawer.vue'
 import DeleteJobDialogBasic from '../demos/forms/DeleteJobDialogBasic.vue'
 import { ref } from "vue"
 import { useAuthStore } from '@/store/useAuthStore'
+import { json } from "stream/consumers"
 
 const isAddNewUserDrawerVisible = ref<Boolean>(false)
 const jobEditid = ref<string | number | any>()
@@ -13,6 +14,8 @@ const deleteJobDialog = ref<boolean>(false)
 const searchQuery = ref<string>('')
 const jStore = useJobsStore()
 const aStore = useAuthStore()
+const selectCompanies = ref<Array<string>>()
+const selectedCompany = ref<string|undefined>()
 
 const headers = [
     { title: '', key: 'data-table-expand' },
@@ -53,6 +56,10 @@ const handleSearch = useDebounceFn(() => {
     jStore.getJobsByCompany(searchQuery.value)
 }, 500)
 
+watchEffect(() => {
+    selectCompanies.value = new Set(jStore.totaljobs.map(job => job.company_name))
+})
+
 onMounted(() => {
     if (aStore.userRole === 'admin') {
         jStore.getAllJobs()
@@ -71,11 +78,21 @@ onMounted(() => {
         </div>
         <VDivider class="my-4" />
 
-        <!-- 👉 Search  -->
-        <div class="invoice-list-search">
-            <AppTextField placeholder="Search By Job Title" density="compact" class="my-2" v-model="searchQuery"
-                @input="handleSearch" prepend-inner-icon="tabler-search" />
-        </div>
+        <!-- 👉 Search and filter -->
+        <VRow class="my-2">
+            <VCol cols="8">
+                <div class="invoice-list-search">
+                    <AppTextField placeholder="Search By Job Title" density="compact"  v-model="searchQuery"
+                        @input="handleSearch" prepend-inner-icon="tabler-search" />
+                </div>
+            </VCol>
+            <VCol cols="4">
+                <div>
+                    <AppSelect :items="selectCompanies" placeholder="Select Company" clearable v-model="selectedCompany"></AppSelect>
+                </div>
+            </VCol>
+        </VRow>
+
 
         <div v-if="aStore.userRole === 'admin'">
             <VDataTable :headers="headers" :items="jStore.totaljobs" :items-per-page="10" class="pa-3" expand-on-click>

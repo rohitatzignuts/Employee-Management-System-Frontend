@@ -18,6 +18,7 @@ const deleteCompanyDialog = ref<boolean>(false)
 const searchQuery = ref<string>('')
 const store = useCompanyStore()
 const aStore = useAuthStore()
+const selectedStatus = ref<string|undefined>()
 
 const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
 const headers = [
@@ -50,8 +51,12 @@ const dialogClose = () => {
 }
 
 const handleSearch = useDebounceFn(() => {
-  store.getAllCompanies(searchQuery.value)
+  store.getAllCompanies(searchQuery.value,selectedStatus.value)
 }, 500)
+
+watch(selectedStatus, async(newSelectedStatus,oldSelectedStatus)=> {
+  handleSearch()
+})
 
 onMounted(() => {
   store.getAllCompanies()
@@ -69,11 +74,19 @@ onMounted(() => {
       </div>
       <VDivider class="my-4" />
 
-      <!-- 👉 Search  -->
-      <div class="invoice-list-search">
-        <AppTextField placeholder="Search By Name" density="compact" class="my-2" v-model="searchQuery"
-          @input="handleSearch" prepend-inner-icon="tabler-search"/>
-      </div>
+      <!-- 👉 Search and filter -->
+      <VRow class="my-2">
+        <VCol cols="8">
+          <div class="invoice-list-search">
+            <AppTextField placeholder="Search By Name" density="compact"  v-model="searchQuery"
+              @input="handleSearch" prepend-inner-icon="tabler-search" />
+          </div>
+        </VCol>
+        <VCol cols="4">
+          <AppSelect :items="['active','in-active']" placeholder="Status" clearable v-model="selectedStatus"/>
+        </VCol>
+      </VRow>
+
 
       <VDataTable :headers="headers" :items="store.companies" :items-per-page="10" class="pa-3">
 

@@ -11,10 +11,12 @@ const employeeEditid = ref<string | number | any>()
 const employeeDeleteid = ref<string | number | any>()
 const deleteCompanyDialog = ref<boolean>(false)
 const searchQuery = ref<string>('')
+const selectedRole = ref<string>()
 
 const store = useEmployeesStore()
 const aStore = useAuthStore()
 
+const status = ['cmp_admin','employee']
 const headers = [
     { title: "NAME", key: "first_name", },
     { title: "EMAIL", key: "email" },
@@ -51,16 +53,22 @@ const handleEmployeeDelete = (employeeId: number) => {
 
 const handleSearch = useDebounceFn(() => {
     if (aStore.userRole === 'admin') {
-        store.getAllEmployees(searchQuery.value)
+        store.getAllEmployees(searchQuery.value,selectedRole.value)
+    } else {
+        store.getCompanyEmployees(searchQuery.value)
     }
-    store.getCompanyEmployees(searchQuery.value)
 }, 500)
+
+watch(selectedRole, async(newSelectedRole,oldSelectedRole) => {
+    handleSearch()
+})
 
 onMounted(() => {
     if (aStore.userRole === 'admin') {
         store.getAllEmployees()
+    } else {
+        store.getCompanyEmployees()
     }
-    store.getCompanyEmployees()
 })
 </script>
 
@@ -74,12 +82,20 @@ onMounted(() => {
         </div>
         <VDivider class="my-4" />
 
-        <!-- 👉 Search  -->
-        <div class="invoice-list-search">
-            <AppTextField placeholder="Search By First Name" density="compact" class="my-2" v-model="searchQuery"
-                @input="handleSearch" prepend-inner-icon="tabler-search" />
-        </div>
-        
+        <!-- 👉 Search and filter -->
+        <VRow class="my-2">
+            <VCol cols="8">
+                <div class="invoice-list-search">
+                    <AppTextField placeholder="Search By First Name" density="compact" 
+                        v-model="searchQuery" @input="handleSearch" prepend-inner-icon="tabler-search" />
+                </div>
+            </VCol>
+            <VCol cols="4">
+                <AppSelect :items="status" placeholder="Role" clearable v-model="selectedRole"></AppSelect>
+            </VCol>
+        </VRow>
+
+
         <!-- show all employees of all the companies if user is Admin  -->
         <div v-if="aStore.userRole === 'admin'">
             <VDataTable :headers="headers" :items="store.employees" :items-per-page="10" class="pa-3">

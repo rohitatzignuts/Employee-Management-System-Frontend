@@ -7,16 +7,19 @@ export const useCompanyStore = defineStore('companies', () => {
     const companies = ref<Array<Object>>([])
     const access_token = localStorage.getItem("access_token")
 
-    const getAllCompanies = async (term: string | null = '') => {
+    const getAllCompanies = async (term: string | null = '',status: string | undefined = undefined) => {
         try {
-            const response = await axios.get(`companies/search?term=${term}`, {
+            const response = await axios.get(`companies/search`, {
                 headers: {
                     Authorization: `Bearer ${access_token}`,
+                },
+                params : {
+                    term,status
                 }
             })
             if (response.data) {
-                companies.value = response.data
-                totalCompanies.value = response.data.length
+                companies.value = response.data.data
+                totalCompanies.value = response.data.data.length
             } else {
                 console.log('No Companies For Now....')
             }

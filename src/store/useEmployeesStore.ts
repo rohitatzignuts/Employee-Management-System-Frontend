@@ -12,12 +12,16 @@ export const useEmployeesStore = defineStore('employees', () => {
     const cmpEmployeeCount = ref<number>()
 
     // get all the employees ( super admin )
-    const getAllEmployees = async (term: string | null = '') => {
+    const getAllEmployees = async (term: string | null = '',status: string | undefined = undefined) => {
         const access_token = localStorage.getItem("access_token");
         try {
-            const response = await axios.get(`employees/search?term=${term}`, {
+            const response = await axios.get(`employees/search`, {
                 headers: {
                     Authorization: `Bearer ${access_token}`,
+                },
+                params : {
+                    term ,
+                    status 
                 }
             });
             employees.value = response.data;
@@ -26,14 +30,16 @@ export const useEmployeesStore = defineStore('employees', () => {
         }
     };
     
-
     // get the employees of the logged in company admin
-    const getCompanyEmployees = async (term: string | null = '') => {
+    const getCompanyEmployees = async (term: string | null = '',status: string | undefined = undefined) => {
         const access_token = localStorage.getItem("access_token");
         try {
-            const response = await axios.get(`${storedCmpId}/employees/search?term=${term}`, {
+            const response = await axios.get(`${storedCmpId}/employees/search`, {
                 headers: {
                     Authorization: `Bearer ${access_token}`,
+                },
+                params : {
+                    term ,status 
                 }
             });
             cmpEmployees.value = response.data.data;
