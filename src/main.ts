@@ -27,6 +27,7 @@ app.use(Vue3Toastify, {
   autoClose: 3000,
   "theme": "dark",
 } as ToastContainerOptions);
+
 app.use(VueSweetalert2, options);
 app.use(vuetify);
 const pinia = createPinia();

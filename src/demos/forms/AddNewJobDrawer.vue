@@ -22,9 +22,8 @@ interface Props {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
-const store = useCompanyStore()
-const eStore = useEmployeesStore()
-const aStore = useAuthStore()
+
+// 👉 ref variables
 const isEditing = ref<Boolean>(false)
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
@@ -36,9 +35,14 @@ const jobData = ref({
   "description": "",
   "location": "",
   "pay": "",
-  "company_name": "",
-  "is_active" : false
+  "company_name": undefined,
+  "is_active": false
 })
+
+// 👉 constants
+const store = useCompanyStore()
+const eStore = useEmployeesStore()
+const aStore = useAuthStore()
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
@@ -60,13 +64,13 @@ const getJobData = async (jobId: string | number) => {
         Authorization: `Bearer ${access_token}`,
       }
     })
-    jobData.value.title = response.data.title
-    jobData.value.description = response.data.description
-    jobData.value.location = response.data.location
-    jobData.value.pay = response.data.pay
-    jobData.value.company_name = response.data.company_name
+    jobData.value.title = response.data.data.title
+    jobData.value.description = response.data.data.description
+    jobData.value.location = response.data.data.location
+    jobData.value.pay = response.data.data.pay
+    jobData.value.company_name = response.data.data.company_name
     getEmployeeId.value = null
-    if (response.data.company.is_active) {
+    if (response.data.data.is_active) {
       jobData.value.is_active = true
     } else {
       jobData.value.is_active = false
@@ -79,6 +83,7 @@ const getJobData = async (jobId: string | number) => {
 // 👉 edit existig company and create a new company
 const onSubmit = async () => {
   try {
+    // check form validation
     refForm.value?.validate().then(async (res) => {
       if (res.valid) {
         let input = {
@@ -90,6 +95,7 @@ const onSubmit = async () => {
           'company_name': jobData.value.company_name,
         }
         isEditing.value = props.existingJobId ? true : false
+        //dynamiclly change main URL on the basis of 'props.employeeId'
         const url = props.existingJobId ? `job/update/${props.existingJobId}` : `job/create`
         const response = await axios.post(url, input, {
           headers: {
@@ -120,6 +126,7 @@ const onSubmit = async () => {
   }
 }
 
+// is user is admin then show the option of multiple companies else show only one
 watchEffect(() => {
   if (aStore.userRole === 'admin') {
     resisteredCompanies.value = store.companies.map(cmp => cmp.name)
@@ -129,17 +136,20 @@ watchEffect(() => {
 })
 
 watchEffect(() => {
+  // Check if an job ID is provided
   if (props.existingJobId) {
     isEditing.value = true
     getEmployeeId.value = props.existingJobId
-    // fetch company details
+    // Fetch job details
     getJobData(props.existingJobId)
   } else {
+    // Reset values if no job ID is provided
     isEditing.value = false
     getEmployeeId.value = null
   }
 })
 
+// get the jobs when the component mounts 
 onMounted(() => {
   store.getAllCompanies()
 })
@@ -182,8 +192,8 @@ onMounted(() => {
               <!-- 👉From Company -->
               <VCol cols="12">
                 <AppSelect label="Companies" :items="resisteredCompanies" placeholder="Select Company"
-                  v-model="jobData.company_name" required 
-                  :rules="[requiredValidator]" :disabled="props.existingJobId"/>
+                  v-model="jobData.company_name" required :rules="[requiredValidator]"
+                  :disabled="props.existingJobId" />
               </VCol>
 
               <!-- 👉 Job Status -->

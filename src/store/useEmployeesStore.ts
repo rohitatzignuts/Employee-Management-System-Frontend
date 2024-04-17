@@ -15,7 +15,7 @@ export const useEmployeesStore = defineStore('employees', () => {
     const getAllEmployees = async (term: string | null = '',status: string | undefined = undefined) => {
         const access_token = localStorage.getItem("access_token");
         try {
-            const response = await axios.get(`employees/search`, {
+            const response = await axios.get(`employees`, {
                 headers: {
                     Authorization: `Bearer ${access_token}`,
                 },
@@ -34,7 +34,7 @@ export const useEmployeesStore = defineStore('employees', () => {
     const getCompanyEmployees = async (term: string | null = '',status: string | undefined = undefined) => {
         const access_token = localStorage.getItem("access_token");
         try {
-            const response = await axios.get(`${storedCmpId}/employees/search`, {
+            const response = await axios.get(`${storedCmpId}/employees`, {
                 headers: {
                     Authorization: `Bearer ${access_token}`,
                 },

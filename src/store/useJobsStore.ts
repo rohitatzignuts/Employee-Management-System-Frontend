@@ -9,11 +9,15 @@ export const useJobsStore = defineStore("jobs", () => {
     const totalJobsCount = ref<number>(0)
     const totalJobsCountByCompany = ref<number>(0)
 
-    const getAllJobs = async (term: string | null = '') => {
+    const getAllJobs = async (term: string | null = '',company: string | undefined = undefined) => {
         try {
-            const response = await axios.get(`jobs/search?term=${term}`)
-            totaljobs.value = response.data
-            totalJobsCount.value = response.data.length
+            const response = await axios.get(`jobs`,{
+                params : {
+                    term,company
+                }
+            })
+            totaljobs.value = response.data.data
+            totalJobsCount.value = response.data.data.length
         } catch (error) {
             console.error('Error fetching jobs', error)
         } finally {

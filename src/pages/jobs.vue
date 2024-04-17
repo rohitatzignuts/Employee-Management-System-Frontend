@@ -5,17 +5,21 @@ import AddNewJobDrawer from '../demos/forms/AddNewJobDrawer.vue'
 import DeleteJobDialogBasic from '../demos/forms/DeleteJobDialogBasic.vue'
 import { ref } from "vue"
 import { useAuthStore } from '@/store/useAuthStore'
-import { json } from "stream/consumers"
+import { useCompanyStore } from "@/store/useCompanyStore"
 
+// ref variables
 const isAddNewUserDrawerVisible = ref<Boolean>(false)
 const jobEditid = ref<string | number | any>()
 const jobDeleteid = ref<string | number | any>()
 const deleteJobDialog = ref<boolean>(false)
 const searchQuery = ref<string>('')
+const selectCompanies = ref<Array<string>>([])
+const selectedCompany = ref<string | undefined>(undefined)
+
+// constants
 const jStore = useJobsStore()
 const aStore = useAuthStore()
-const selectCompanies = ref<Array<string>>()
-const selectedCompany = ref<string|undefined>()
+const cStore = useCompanyStore()
 
 const headers = [
     { title: '', key: 'data-table-expand' },
@@ -26,20 +30,24 @@ const headers = [
     { title: "Actions", key: "actions" },
 ]
 
+// handle job create 
 const handleJobCreate = () => {
     isAddNewUserDrawerVisible.value = true
 }
 
+// handle job edit 
 const handleJobEdit = (id: string | number) => {
     jobEditid.value = id
     isAddNewUserDrawerVisible.value = true
 }
 
+// handle job delete 
 const handleJobDelete = (id: string | number) => {
     deleteJobDialog.value = true
     jobDeleteid.value = id
 }
 
+// when dialog is closed clear jobEditid and recall the jobs list
 const dialogClose = () => {
     isAddNewUserDrawerVisible.value = false
     jobEditid.value = null
@@ -49,22 +57,32 @@ const dialogClose = () => {
     jStore.getJobsByCompany()
 }
 
+// handle job title search
 const handleSearch = useDebounceFn(() => {
     if (aStore.userRole === 'admin') {
-        jStore.getAllJobs(searchQuery.value)
+        jStore.getAllJobs(searchQuery.value, selectedCompany.value)
+    } else {
+        jStore.getJobsByCompany(searchQuery.value)
     }
-    jStore.getJobsByCompany(searchQuery.value)
 }, 500)
 
+// assign value to the selectCompanies
 watchEffect(() => {
-    selectCompanies.value = new Set(jStore.totaljobs.map(job => job.company_name))
+    selectCompanies.value = cStore.registeredCompanies
 })
 
+// recall the handleSearch() when select item changes
+watch(selectedCompany, (newSelectedCompany, oldSelectedCompany) => {
+    handleSearch()
+})
+
+// list all the jobs when the component first mounts
 onMounted(() => {
     if (aStore.userRole === 'admin') {
         jStore.getAllJobs()
     }
     jStore.getJobsByCompany()
+    cStore.getAllRegisteredCompanies()
 })
 </script>
 
@@ -79,23 +97,27 @@ onMounted(() => {
         <VDivider class="my-4" />
 
         <!-- 👉 Search and filter -->
-        <VRow class="my-2">
-            <VCol cols="8">
+        <VRow class="my-2" v-if="jStore.totaljobs.length || jStore.totalJobsByCompanies.length">
+            <VCol :cols="aStore.userRole === 'admin' ? 8 : 12">
                 <div class="invoice-list-search">
-                    <AppTextField placeholder="Search By Job Title" density="compact"  v-model="searchQuery"
+                    <AppTextField placeholder="Search By Job Title" density="compact" v-model="searchQuery"
                         @input="handleSearch" prepend-inner-icon="tabler-search" />
                 </div>
             </VCol>
-            <VCol cols="4">
+            <VCol cols="4" v-if="aStore.userRole === 'admin'">
                 <div>
-                    <AppSelect :items="selectCompanies" placeholder="Select Company" clearable v-model="selectedCompany"></AppSelect>
+                    <AppSelect :items="selectCompanies" placeholder="Select Company" clearable
+                        v-model="selectedCompany"></AppSelect>
                 </div>
             </VCol>
         </VRow>
 
 
+        <!-- show this if user is of type 'admin' -->
         <div v-if="aStore.userRole === 'admin'">
+            <!-- 👉 data table for job data -->
             <VDataTable :headers="headers" :items="jStore.totaljobs" :items-per-page="10" class="pa-3" expand-on-click>
+                <!-- 👉 template for job details  -->
                 <template #expanded-row="slotProps">
                     <tr class="v-data-table__tr">
                         <td :colspan="headers.length">
@@ -108,7 +130,7 @@ onMounted(() => {
                         </td>
                     </tr>
                 </template>
-
+                <!-- 👉 template for job status  -->
                 <template #item.is_active="{ item }">
                     <div class="d-flex gap-1">
                         <VChip v-if="item.raw.is_active === 0">
@@ -119,7 +141,7 @@ onMounted(() => {
                         </VChip>
                     </div>
                 </template>
-
+                <!-- 👉 template for job actions edit/delete  -->
                 <template #item.actions="{ item }">
                     <div class="d-flex gap-1">
                         <IconBtn @click="handleJobEdit(item.raw.id)">
@@ -133,9 +155,12 @@ onMounted(() => {
             </VDataTable>
         </div>
 
+        <!-- show this if user is of type 'cmp_admin' -->
         <div v-if="aStore.userRole === 'cmp_admin'">
+            <!-- 👉 data table for jobs data -->
             <VDataTable :headers="headers" :items="jStore.totalJobsByCompanies" :items-per-page="10" class="pa-3"
                 expand-on-click>
+                <!-- 👉 template for job description  -->
                 <template #expanded-row="slotProps">
                     <tr class="v-data-table__tr">
                         <td :colspan="headers.length">
@@ -149,6 +174,7 @@ onMounted(() => {
                     </tr>
                 </template>
 
+                <!-- 👉 template for job status  -->
                 <template #item.is_active="{ item }">
                     <div class="d-flex gap-1">
                         <VChip v-if="item.raw.is_active === 0">
@@ -160,6 +186,7 @@ onMounted(() => {
                     </div>
                 </template>
 
+                <!-- 👉 template for job actions edit/delete  -->
                 <template #item.actions="{ item }">
                     <div class="d-flex gap-1">
                         <IconBtn @click="handleJobEdit(item.raw.id)">
@@ -173,8 +200,10 @@ onMounted(() => {
             </VDataTable>
         </div>
 
+        <!-- 👉 drawer for adding and editing jobs  -->
         <AddNewJobDrawer :is-drawer-open="isAddNewUserDrawerVisible" @close-dialog="dialogClose"
             :existing-job-id="jobEditid" />
+        <!-- 👉 dialog for deleting jobs -->
         <DeleteJobDialogBasic :isDialogVisible="deleteJobDialog" :delete-id="jobDeleteid"
             @isDeleteDialogVisible="deleteJobDialog = false" />
     </div>

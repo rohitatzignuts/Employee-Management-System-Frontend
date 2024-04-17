@@ -22,22 +22,25 @@ interface Props {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
-const store = useCompanyStore()
-const eStore = useEmployeesStore()
-const aStore = useAuthStore()
+
+// 👉 ref variables
 const isEditing = ref<Boolean>(false)
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const getEmployeeId = ref<string | number | null>(props.employeeId ?? null)
 let resisteredCompanies = ref([]);
-
 const empData = ref({
   "first_name": "",
   "last_name": "",
   "email": "",
   "joining_date": "",
-  "company_name": ""
+  "company_name": undefined
 })
+
+// 👉 constants
+const store = useCompanyStore()
+const eStore = useEmployeesStore()
+const aStore = useAuthStore()
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
@@ -73,8 +76,9 @@ const getEmployeeData = async (empId: string | number) => {
 // 👉 edit existig company and create a new company
 const onSubmit = async () => {
   try {
+    // check form validation
     refForm.value?.validate().then(async (res) => {
-      if (res.valid){
+      if (res.valid) {
         let input = {
           'first_name': empData.value.first_name,
           'last_name': empData.value.last_name,
@@ -83,6 +87,7 @@ const onSubmit = async () => {
           'joining_date': empData.value.joining_date,
         }
         isEditing.value = !!props.employeeId;
+        //dynamiclly change main URL on the basis of 'props.employeeId'
         const url = props.employeeId ? `employee/update/${props.employeeId}` : `employee/create`;
         const response = await axios.post(url, input, {
           headers: {
@@ -111,7 +116,7 @@ const onSubmit = async () => {
   }
 };
 
-
+// is user is admin then show the option of multiple companies else show only one
 watchEffect(() => {
   if (aStore.userRole === 'admin') {
     resisteredCompanies.value = store.companies.map(cmp => cmp.name);
@@ -121,17 +126,20 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
+  // Check if an employee ID is provided
   if (props.employeeId) {
     isEditing.value = true
     getEmployeeId.value = props.employeeId
-    // fetch company details
+    // Fetch employee details
     getEmployeeData(props.employeeId)
   } else {
+    // Reset values if no employee ID is provided
     isEditing.value = false
     getEmployeeId.value = null
   }
 })
 
+// get the companies when the component mounts 
 onMounted(() => {
   store.getAllCompanies()
 })
@@ -147,6 +155,7 @@ onMounted(() => {
           <!-- 👉 Form -->
           <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit" enctype="multipart/form-data">
             <VRow>
+
               <!-- 👉 Employee  First Name -->
               <VCol cols="12">
                 <AppTextField v-model="empData.first_name" :rules="[requiredValidator]" label="First Name"
@@ -172,8 +181,8 @@ onMounted(() => {
 
               <!-- 👉 Employee Company -->
               <VCol cols="12">
-                <AppSelect label="Companies" :items="resisteredCompanies" placeholder="Select Company"
-                  v-model="empData.company_name" :rules="[requiredValidator]" :disabled="props.employeeId"/>
+                <AppSelect label="Companies" v-model="empData.company_name" :items="resisteredCompanies"
+                  placeholder="Select Company" :rules="[requiredValidator]" :disabled="props.employeeId" />
               </VCol>
 
               <!-- 👉 Submit and Cancel -->
@@ -185,6 +194,7 @@ onMounted(() => {
                   Cancel
                 </VBtn>
               </VCol>
+
             </VRow>
           </VForm>
         </VCardText>

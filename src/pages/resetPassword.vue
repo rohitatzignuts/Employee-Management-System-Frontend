@@ -12,15 +12,17 @@ import router from '@/router'
 import { emailValidator, requiredValidator } from '../@core/utils/validators'
 import { ref } from 'vue'
 import { useAuthStore } from '../store/useAuthStore'
+import { toast } from 'vue3-toastify'
+import 'vue3-toastify/dist/index.css'
 
 const refVForm = ref<VForm>()
+const store = useAuthStore()
 const loginData = ref({
-  email: '',
+  email: store.username,
   oldPassword: '',
   newPassword: ''
 })
 
-const store = useAuthStore()
 const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
@@ -29,24 +31,40 @@ const isnewPasswordVisible = ref(false)
 
 
 const handlePasswordReset = async () => {
-  const accessToken = localStorage.getItem("access_token");
-  try {
-    const response = await axios.post('resetPassword', loginData.value, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-    if (response.status === 200) {
-      store.handleLogout()
-      router.push('/login')
-      loginData.value.email = ""
-      loginData.value.oldPassword = ""
-      loginData.value.newPassword = ""
+  refVForm.value?.validate().then(async (res) => {
+    if(res.valid){
+      const accessToken = localStorage.getItem("access_token")
+      try {
+        const response = await axios.post('resetPassword', loginData.value, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        if (response) {
+          store.handleLogout()
+          router.push('/login')
+          loginData.value.email = ""
+          loginData.value.oldPassword = ""
+          loginData.value.newPassword = ""
+          toast(`${response.data.message}`, {
+            type: "success",
+          })
+        }
+      } catch (error :any) {
+        toast(`InValid Credentials : ${error.message}`, {
+          type: "error",
+        })
+      }finally{
+        loginData.value = {
+        email: store.username,
+        oldPassword: '',
+        newPassword: ''
+      }
+      }
     }
-  } catch (error) {
-    console.log(error)
-  }
+  })
 }
+
 </script>
 
 <template>

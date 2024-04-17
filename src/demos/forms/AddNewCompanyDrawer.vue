@@ -8,24 +8,24 @@ import { ref, nextTick, watchEffect } from 'vue';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
-interface Emit {
-  (e: 'closeDialog', value: Boolean): void
-}
-
 interface Props {
   isDrawerOpen: boolean
   companyId?: string | number
 }
 
+interface Emit {
+  (e: 'closeDialog', value: Boolean): void
+}
+
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 
+// refs
 const logoFile = ref<string | null>('')
 const isEditing = ref<boolean>(false)
 const isFormValid = ref<boolean>(false)
 const refForm = ref<VForm>()
 const getCompanyId = ref<string | number | null>(props.companyId ?? null)
-
 const companyData = ref({
   'name': '',
   'logo': undefined,
@@ -34,7 +34,6 @@ const companyData = ref({
   'location': '',
   'is_active': false
 })
-
 const cmpAdminData = ref({
   'first_name': '',
   'last_name': '',
@@ -42,6 +41,7 @@ const cmpAdminData = ref({
   'joining_date': '',
 })
 
+// 👉 select different image/logo
 const onLogoChange = (e: any) => {
   logoFile.value = e.target.files[0];
 }
@@ -67,24 +67,38 @@ const getCompanyData = async (comId: string | number) => {
         'content-type': 'multipart/form-data'
       }
     })
-    companyData.value = response.data.company;    
-    cmpAdminData.value = response.data.employee
+
+    companyData.value.name = response.data.data.name,
+    companyData.value.location = response.data.data.location,
+    companyData.value.cmp_email = response.data.data.cmp_email,
+    companyData.value.is_active = response.data.data.is_active,
+    companyData.value.logo = response.data.data.logo,
+    companyData.value.website = response.data.data.website,
+
+    cmpAdminData.value.email = response.data.data.company_admin.email
+    cmpAdminData.value.first_name = response.data.data.company_admin.first_name
+    cmpAdminData.value.joining_date = response.data.data.company_admin.joining_date
+    cmpAdminData.value.last_name = response.data.data.company_admin.last_name
+    // clear getCompanyId
     getCompanyId.value = null
-    if (response.data.company.is_active) {
+    // manage active/ deactive state of the company
+    if (response.data.data.company_admin.is_active) {
       companyData.value.is_active = true
     } else {
       companyData.value.is_active = false
     }
   } catch (error) {
-    console.error("Error submitting data:", error);
+    console.error("Error getting data:", error);
   }
 }
 
 // 👉 edit existig company and create a new company
 const onSubmit = async () => {
   try {
+    // check form validation
     refForm.value?.validate().then(async (res) => {
-      if(res.valid){
+      if (res.valid) {
+        // handle image/file submission
         const formData = new FormData()
         formData.append('logo', logoFile.value);
         let input = {
@@ -93,13 +107,14 @@ const onSubmit = async () => {
           'website': companyData.value.website,
           'cmp_email': companyData.value.cmp_email,
           'location': companyData.value.location,
-          'is_active': companyData.value.is_active ? 1 : 0,
+          'is_active': companyData.value.is_active ? 0 : 1,
           'first_name': cmpAdminData.value.first_name,
           'last_name': cmpAdminData.value.last_name,
           'email': cmpAdminData.value.email,
           'joining_date': cmpAdminData.value.joining_date,
         }
         isEditing.value = props.companyId ? true : false
+        //dynamiclly change main URL on the basis of 'props.companyId'
         const url = props.companyId ? `company/update/${props.companyId}` : `company/create`
         const response = await axios.post(url, input, {
           headers: {
@@ -119,20 +134,22 @@ const onSubmit = async () => {
         }
       }
     })
-  } catch (error : any) {
+  } catch (error: any) {
     toast(`Error Creating Company : ${error.message}`, {
-        "type": "error",
-      })
+      "type": "error",
+    })
   }
 };
 
 watchEffect(() => {
+  // Check if an companyId ID is provided
   if (props.companyId) {
     isEditing.value = true
     getCompanyId.value = props.companyId
-    // fetch company details
+    // Fetch company details
     getCompanyData(props.companyId)
   } else {
+    // Reset values if no company ID is provided
     isEditing.value = false
     getCompanyId.value = null
   }
@@ -149,6 +166,7 @@ watchEffect(() => {
           <!-- 👉 Form -->
           <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit" enctype="multipart/form-data">
             <VRow>
+
               <!-- 👉 Company Name -->
               <VCol cols="12">
                 <AppTextField v-model="companyData.name" :rules="[requiredValidator]" label="Company Name" />
@@ -193,8 +211,8 @@ watchEffect(() => {
 
               <!-- 👉 Company Admin Email -->
               <VCol cols="12">
-                <AppTextField v-model="cmpAdminData.email" type="email"
-                  :rules="[requiredValidator, emailValidator]" label="Company Admin Email" />
+                <AppTextField v-model="cmpAdminData.email" type="email" :rules="[requiredValidator, emailValidator]"
+                  label="Company Admin Email" />
               </VCol>
 
               <!-- 👉 Company Admin Joining Date -->
@@ -217,6 +235,7 @@ watchEffect(() => {
                   Cancel
                 </VBtn>
               </VCol>
+
             </VRow>
           </VForm>
         </VCardText>

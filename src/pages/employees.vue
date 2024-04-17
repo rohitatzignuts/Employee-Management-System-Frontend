@@ -6,6 +6,7 @@ import AddNewEmployeeDrawer from "@/demos/forms/AddNewEmployeeDrawer.vue"
 import DeleteEmployeeDialogBasic from '@/demos/forms/DeleteEmployeeDialogBasic.vue'
 import { useAuthStore } from '@/store/useAuthStore'
 
+// ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false)
 const employeeEditid = ref<string | number | any>()
 const employeeDeleteid = ref<string | number | any>()
@@ -13,10 +14,10 @@ const deleteCompanyDialog = ref<boolean>(false)
 const searchQuery = ref<string>('')
 const selectedRole = ref<string>()
 
+// constants
 const store = useEmployeesStore()
 const aStore = useAuthStore()
-
-const status = ['cmp_admin','employee']
+const status = ['cmp_admin', 'employee']
 const headers = [
     { title: "NAME", key: "first_name", },
     { title: "EMAIL", key: "email" },
@@ -27,6 +28,7 @@ const headers = [
     { title: "Actions", key: "actions" },
 ]
 
+// when dialog is closed clear employeeEditid and recall the employees list
 const dialogClose = () => {
     isAddNewUserDrawerVisible.value = false
     employeeEditid.value = null
@@ -36,33 +38,39 @@ const dialogClose = () => {
     }
 }
 
+//handle employee create
 const handleEmployeeCreate = () => {
     isAddNewUserDrawerVisible.value = true
     employeeEditid.value = null
 }
 
+//handle employee edit
 const handleEmployeeEdit = (employeeId: number) => {
     employeeEditid.value = employeeId
     isAddNewUserDrawerVisible.value = true
 }
 
+//handle employee delete
 const handleEmployeeDelete = (employeeId: number) => {
     employeeDeleteid.value = employeeId
     deleteCompanyDialog.value = true
 }
 
+// handle employee search by name
 const handleSearch = useDebounceFn(() => {
     if (aStore.userRole === 'admin') {
-        store.getAllEmployees(searchQuery.value,selectedRole.value)
+        store.getAllEmployees(searchQuery.value, selectedRole.value)
     } else {
         store.getCompanyEmployees(searchQuery.value)
     }
 }, 500)
 
-watch(selectedRole, async(newSelectedRole,oldSelectedRole) => {
+// recall the handleSearch() when select item changes
+watch(selectedRole, async (newSelectedRole, oldSelectedRole) => {
     handleSearch()
 })
 
+// list all the employees when the component first mounts
 onMounted(() => {
     if (aStore.userRole === 'admin') {
         store.getAllEmployees()
@@ -84,13 +92,13 @@ onMounted(() => {
 
         <!-- 👉 Search and filter -->
         <VRow class="my-2">
-            <VCol cols="8">
+            <VCol :cols="aStore.userRole === 'admin' ? 8 : 12">
                 <div class="invoice-list-search">
-                    <AppTextField placeholder="Search By First Name" density="compact" 
-                        v-model="searchQuery" @input="handleSearch" prepend-inner-icon="tabler-search" />
+                    <AppTextField placeholder="Search By First Name" density="compact" v-model="searchQuery"
+                        @input="handleSearch" prepend-inner-icon="tabler-search" />
                 </div>
             </VCol>
-            <VCol cols="4">
+            <VCol cols="4" v-if="aStore.userRole === 'admin'">
                 <AppSelect :items="status" placeholder="Role" clearable v-model="selectedRole"></AppSelect>
             </VCol>
         </VRow>
@@ -98,7 +106,9 @@ onMounted(() => {
 
         <!-- show all employees of all the companies if user is Admin  -->
         <div v-if="aStore.userRole === 'admin'">
+            <!-- 👉 data table employees data -->
             <VDataTable :headers="headers" :items="store.employees" :items-per-page="10" class="pa-3">
+                <!-- 👉 template for employee actions edit/delete -->
                 <template #item.actions="{ item }">
                     <div class="d-flex gap-1">
                         <IconBtn @click="handleEmployeeEdit(item.props.title.id)">
@@ -109,6 +119,7 @@ onMounted(() => {
                         </IconBtn>
                     </div>
                 </template>
+                <!-- 👉 template for employee role  -->
                 <template #item.role="{ item }">
                     <VChip :color="item.props.title.role === 'cmp_admin' ? 'primary' : 'success'">
                         {{ item.props.title.role }}
@@ -120,7 +131,9 @@ onMounted(() => {
 
         <!-- show all employees of all a perticular company  -->
         <div v-if="aStore.userRole === 'cmp_admin'">
+            <!-- 👉 data table employees data -->
             <VDataTable :headers="headers" :items="store.cmpEmployees" :items-per-page="10" class="pa-3">
+                <!-- 👉 template for employee actions edit/delete -->
                 <template #item.actions="{ item }">
                     <div class="d-flex gap-1">
                         <IconBtn @click="handleEmployeeEdit(item.props.title.id)">
@@ -131,20 +144,23 @@ onMounted(() => {
                         </IconBtn>
                     </div>
                 </template>
+                <!-- 👉 template for employee role  -->
                 <template #item.role="{ item }">
                     <VChip :color="item.props.title.role === 'cmp_admin' ? 'primary' : 'success'">
                         {{ item.props.title.role }}
                     </VChip>
                 </template>
+                <!-- 👉 template for employee company name  -->
                 <template #item.company_name="{ item }">
                     {{ store.storedCmpName[0] }}
                 </template>
             </VDataTable>
         </div>
-        <!--  -->
 
+        <!-- 👉 drawer for adding and editing employees  -->
         <AddNewEmployeeDrawer :employee-id="employeeEditid" :is-drawer-open="isAddNewUserDrawerVisible"
             @close-dialog="dialogClose" />
+        <!-- 👉 dialog for deleting companies -->
         <DeleteEmployeeDialogBasic :isDialogVisible="deleteCompanyDialog" :employee-id="employeeDeleteid"
             @isDeleteDialogVisible="deleteCompanyDialog = false" />
     </div>

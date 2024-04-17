@@ -27,6 +27,7 @@ const navItems =[
   },
 ] 
 
+// hide companies nav item when user is not super admin
 if(aStore.userRole === 'admin'){
   defaultNavItems = navItems as HorizontalNavItems;
 }else{

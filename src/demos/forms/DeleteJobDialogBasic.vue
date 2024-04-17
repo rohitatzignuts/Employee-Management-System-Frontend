@@ -27,6 +27,7 @@ const handleCancel = () => {
   emit('isDeleteDialogVisible', false)
 }
 
+// handle item delete
 const handleJobDelete = async (jobId: string | number) => {
   const access_token = localStorage.getItem("access_token");
   try {
@@ -41,19 +42,21 @@ const handleJobDelete = async (jobId: string | number) => {
           }
         }
       );
-      if (response.data.status == "200") {
+      if (response) {
+        // if delete is success full recall the companies list and show toast message
         store.getAllJobs()
         store.getJobsByCompany()
         toast(`${response.data.message}`, {
           "type": "success",
         })
+        // clear deleteTypeRef after deletion
         deleteTypeRef.value = null
       }
     }
   } catch (error: any) {
     toast(`Error Deleting : ${error}`, {
-          "type": "success",
-        })
+      "type": "success",
+    })
   }
 }
 </script>
@@ -66,11 +69,15 @@ const handleJobDelete = async (jobId: string | number) => {
 
     <!-- Dialog Content -->
     <VCard title="How do you want to delete this record ?">
+      <!-- Delete confirmation form  -->
       <VForm @submit.prevent="handleJobDelete(props.deleteId)">
         <VCardText class="demo-space-x">
+          <!-- permanent checkbox  -->
           <VCheckbox v-model="deleteTypeRef" value="permanent" label="Permanently" name="deleteType" />
+          <!-- temporary checkbox  -->
           <VCheckbox v-model="deleteTypeRef" value="temporary" label="Temporarily" name="deleteType" />
         </VCardText>
+        <!-- Delete confirmation form  controls-->
         <VCardText class="d-flex justify-end gap-2">
           <VBtn @click="handleConfirm" type="submit">
             Confirm
