@@ -4,22 +4,33 @@ import { useCompanyStore } from '../store/useCompanyStore'
 import { useAuthStore } from '@/store/useAuthStore';
 import { useEmployeesStore } from '@/store/useEmployeesStore';
 import { useJobsStore } from '@/store/useJobsStore'
-
+import { storeToRefs } from 'pinia';
 // constants
 const store = useCompanyStore()
+const {getAllCompanies} = store
+const {totalCompanies} = storeToRefs(store)
 const username = localStorage.getItem('username')
+
 const aStore = useAuthStore()
+const {userRole} = aStore
+
 const eStore = useEmployeesStore()
+const {getCompanyEmployees} = eStore
+const {cmpEmployeeCount} = storeToRefs(eStore)
+
 const jStore = useJobsStore()
+const {getAllJobs,getJobsByCompany} = jStore
+const {totalJobsCount,totalJobsCountByCompany} = storeToRefs(jStore)
+
 
 // get the company and job count when the component
 onMounted(() => {
-  if (aStore.userRole === "admin") {
-    store.getAllCompanies()
-    jStore.getAllJobs();
+  if (userRole === "admin") {
+    getAllCompanies()
+    getAllJobs();
   }else{
-    eStore.getCompanyEmployees()
-    jStore.getJobsByCompany()
+    getCompanyEmployees()
+    getJobsByCompany()
   }
 })
 </script>
@@ -31,11 +42,11 @@ onMounted(() => {
       <VCol cols="6">
         <!-- for super admin typeof user  -->
         <RouterLink to="/companies">
-          <VCard v-if="aStore.userRole === 'admin'">
+          <VCard v-if="userRole === 'admin'">
             <VCardTitle>
               <!-- total companies count  -->
               <div>
-                <VIcon icon="mdi-office-building" /><span class="text-h1">{{ store.totalCompanies }}</span>
+                <VIcon icon="mdi-office-building" /><span class="text-h1">{{ totalCompanies }}</span>
               </div>
             </VCardTitle>
             <VCardItem>
@@ -45,11 +56,11 @@ onMounted(() => {
         </RouterLink>
 
         <!-- for cmp_admin typeof user  -->
-        <VCard v-if="aStore.userRole === 'cmp_admin'">
+        <VCard v-if="userRole === 'cmp_admin'">
           <VCardTitle>
             <!-- total employees count  -->
             <div>
-              <VIcon icon="mdi-office-building" /><span class="text-h1">{{ eStore.cmpEmployeeCount }}</span>
+              <VIcon icon="mdi-office-building" /><span class="text-h1">{{ cmpEmployeeCount }}</span>
             </div>
           </VCardTitle>
           <VCardItem>
@@ -61,11 +72,11 @@ onMounted(() => {
 
       <VCol cols="6">
         <!-- for super admin typeof user  -->
-        <VCard v-if="aStore.userRole === 'admin'">
+        <VCard v-if="userRole === 'admin'">
           <VCardTitle>
             <!-- total job count  -->
             <div>
-              <VIcon icon="mdi-file-account" /><span class="text-h1">{{ jStore.totalJobsCount }}</span>
+              <VIcon icon="mdi-file-account" /><span class="text-h1">{{ totalJobsCount }}</span>
             </div>
           </VCardTitle>
           <VCardItem>
@@ -74,11 +85,11 @@ onMounted(() => {
         </VCard>
 
         <!-- for cmp_admin typeof user  -->
-        <VCard v-if="aStore.userRole === 'cmp_admin'">
+        <VCard v-if="userRole === 'cmp_admin'">
           <VCardTitle>
             <!-- total job count of the logged in company  -->
             <div>
-              <VIcon icon="mdi-file-account" /><span class="text-h1">{{ jStore.totalJobsCountByCompany }}</span>
+              <VIcon icon="mdi-file-account" /><span class="text-h1">{{ totalJobsCountByCompany }}</span>
             </div>
           </VCardTitle>
           <VCardItem>

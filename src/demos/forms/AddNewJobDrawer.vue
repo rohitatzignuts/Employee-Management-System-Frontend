@@ -49,7 +49,6 @@ const aStore = useAuthStore()
 // 👉 drawer close
 const closeNavigationDrawer = () => {
   emit('closeDialog', false)
-  emit('actionCanceled', true)
   isEditing.value = false
 
   nextTick(() => {

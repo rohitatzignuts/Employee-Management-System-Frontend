@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {useAuthStore} from '../../store/useAuthStore'
 const store = useAuthStore()
+const {userRole,username,handleLogout} = store
 </script>
 
 <template>
@@ -24,9 +25,9 @@ const store = useAuthStore()
             </template>
 
             <VListItemTitle class="font-weight-semibold">
-              {{ store.username }}
+              {{ username }}
             </VListItemTitle>
-            <VListItemSubtitle>{{ store.userRole }}</VListItemSubtitle>
+            <VListItemSubtitle>{{ userRole }}</VListItemSubtitle>
           </VListItem>
 
           <VDivider class="my-2" />
@@ -43,7 +44,7 @@ const store = useAuthStore()
           <VDivider class="my-2" />
 
           <!-- 👉 Logout -->
-          <VListItem @click="store.handleLogout">
+          <VListItem @click="handleLogout">
             <template #prepend>
               <VIcon class="me-2" icon="tabler-logout" size="22" />
             </template>

@@ -9,8 +9,9 @@ import misc404 from '@images/pages/404.png'
 import { useAuthStore } from "@/store/useAuthStore";
 import { useDebounceFn } from '@vueuse/core'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import miscMaskDark from '@images/pages/misc-mask-dark.png'
+import miscMaskDark from '@images/pages/misc-mask-dsark.png'
 import miscMaskLight from '@images/pages/misc-mask-light.png'
+import { storeToRefs } from "pinia";
 
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false);
@@ -22,7 +23,10 @@ const selectedStatus = ref<string | any>()
 // constants
 const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
 const store = useCompanyStore()
+const {totalCompanies,isLoading,companies,registeredCompanies} = storeToRefs(store)
+const {getAllCompanies} = store
 const aStore = useAuthStore()
+const {userRole} = aStore
 
 const headers = [
   { title: "NAME", key: "name" },
@@ -55,14 +59,14 @@ const dialogClose = (e: any) => {
   isAddNewUserDrawerVisible.value = false
   companyEditId.value = null
   if (e) {
-    store.getAllCompanies()
+    getAllCompanies()
   }
 }
 
 // handle company search
 const handleSearch = useDebounceFn(() => {
-  if (aStore.userRole === 'admin') {
-    store.getAllCompanies(searchQuery.value, selectedStatus.value)
+  if (userRole === 'admin') {
+    getAllCompanies(searchQuery.value, selectedStatus.value)
   }
 }, 500)
 
@@ -73,8 +77,8 @@ watch(selectedStatus, async (newSelectedStatus, oldSelectedStatus) => {
 
 // list all the companies when the component first mounts
 onMounted(() => {
-  if (aStore.userRole === 'admin') {
-    store.getAllCompanies()
+  if (userRole === 'admin') {
+    getAllCompanies()
   }
 })
 </script>
@@ -83,7 +87,7 @@ onMounted(() => {
   <div>
 
     <!-- 👉 make companies section visible to only super admin(admin) -->
-    <div v-if="aStore.userRole === 'admin'">
+    <div v-if="userRole === 'admin'">
 
       <div class="d-flex align-center justify-space-between">
         <h1>Companies</h1>
@@ -107,7 +111,7 @@ onMounted(() => {
       </VRow>
 
       <!-- 👉 data table for companies data -->
-      <VDataTable :headers="headers" :items="store.companies" :items-per-page="10" class="pa-3">
+      <VDataTable :headers="headers" :items="companies" :items-per-page="10" class="pa-3">
 
         <!-- 👉 template for company status  -->
         <template #item.is_active="{ item }">

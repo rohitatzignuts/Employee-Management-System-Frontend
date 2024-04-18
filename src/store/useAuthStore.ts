@@ -1,7 +1,6 @@
 import axios from "axios";
 import CryptoJS from "crypto-js";
 import router from '@/router'
-import Swal from "sweetalert2";
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 

@@ -6,7 +6,7 @@ import DeleteJobDialogBasic from '../demos/forms/DeleteJobDialogBasic.vue'
 import { ref } from "vue"
 import { useAuthStore } from '@/store/useAuthStore'
 import { useCompanyStore } from "@/store/useCompanyStore"
-
+import { storeToRefs } from "pinia"
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false)
 const jobEditid = ref<number | any>()
@@ -18,8 +18,15 @@ const selectedCompany = ref<string | any>()
 
 // constants
 const jStore = useJobsStore()
+const {totaljobs,totalJobsByCompanies} = storeToRefs(jStore)
+const {getAllJobs,getJobsByCompany } = jStore
+
 const aStore = useAuthStore()
+const {userRole} = aStore
+
 const cStore = useCompanyStore()
+const {registeredCompanies,companies} = storeToRefs(cStore)
+const {getAllRegisteredCompanies} = cStore
 
 const headers = [
     { title: '', key: 'data-table-expand' },
@@ -48,29 +55,31 @@ const handleJobDelete = (id: number) => {
 }
 
 // when dialog is closed clear jobEditid and recall the jobs list
-const dialogClose = (e) => {
+const dialogClose = (e:any) => {
     isAddNewUserDrawerVisible.value = false
     jobEditid.value = null
     if (e) {
-        if (aStore.userRole === 'admin') {
-            jStore.getAllJobs()
+        if (userRole === 'admin') {
+            getAllJobs()
         }
-        jStore.getJobsByCompany()
+        getJobsByCompany()
     }
 }
 
 // handle job title search
 const handleSearch = useDebounceFn(() => {
-    if (aStore.userRole === 'admin') {
-        jStore.getAllJobs(searchQuery.value, selectedCompany.value)
+    if (userRole === 'admin') {
+        getAllJobs(searchQuery.value, selectedCompany.value)
     } else {
-        jStore.getJobsByCompany(searchQuery.value)
+        getJobsByCompany(searchQuery.value)
     }
 }, 500)
 
 // assign value to the selectCompanies
 watchEffect(() => {
-    selectCompanies.value = cStore.registeredCompanies
+    if (Array.isArray(registeredCompanies.value)) {
+        selectCompanies.value = [...registeredCompanies.value]
+    }
 })
 
 // recall the handleSearch() when select item changes
@@ -80,13 +89,13 @@ watch(selectedCompany, (newSelectedCompany, oldSelectedCompany) => {
 
 // list all the jobs when the component first mounts
 onMounted(() => {
-    if (aStore.userRole === 'admin') {
-        jStore.getAllJobs()
+    if (userRole === 'admin') {
+        getAllJobs()
     } else {
-        jStore.getJobsByCompany()
+        getJobsByCompany()
     }
-    if (cStore.companies.length > 1) {
-        cStore.getAllRegisteredCompanies()
+    if (companies.value.length > 1) {
+        getAllRegisteredCompanies()
     }
 })
 </script>
@@ -102,13 +111,13 @@ onMounted(() => {
         <VDivider class="my-4" />
         <!-- 👉 Search and filter -->
         <VRow class="my-2">
-            <VCol :cols="aStore.userRole === 'admin' ? 8 : 12">
+            <VCol :cols="userRole === 'admin' ? 8 : 12">
                 <div class="invoice-list-search">
                     <AppTextField placeholder="Search By Job Title" density="compact" v-model="searchQuery"
                         @input="handleSearch" prepend-inner-icon="tabler-search" />
                 </div>
             </VCol>
-            <VCol cols="4" v-if="aStore.userRole === 'admin'">
+            <VCol cols="4" v-if="userRole === 'admin'">
                 <div>
                     <AppSelect :items="selectCompanies" placeholder="Select Company" clearable
                         v-model="selectedCompany"></AppSelect>
@@ -117,9 +126,9 @@ onMounted(() => {
         </VRow>
 
         <!-- show this if user is of type 'admin' -->
-        <div v-if="aStore.userRole === 'admin'">
+        <div v-if="userRole === 'admin'">
             <!-- 👉 data table for job data -->
-            <VDataTable :headers="headers" :items="jStore.totaljobs" :items-per-page="10" class="pa-3" expand-on-click>
+            <VDataTable :headers="headers" :items="totaljobs" :items-per-page="10" class="pa-3" expand-on-click>
                 <!-- 👉 template for job details  -->
                 <template #expanded-row="slotProps">
                     <tr class="v-data-table__tr">
@@ -159,9 +168,9 @@ onMounted(() => {
         </div>
 
         <!-- show this if user is of type 'cmp_admin' -->
-        <div v-if="aStore.userRole === 'cmp_admin'">
+        <div v-if="userRole === 'cmp_admin'">
             <!-- 👉 data table for jobs data -->
-            <VDataTable :headers="headers" :items="jStore.totalJobsByCompanies" :items-per-page="10" class="pa-3"
+            <VDataTable :headers="headers" :items="totalJobsByCompanies" :items-per-page="10" class="pa-3"
                 expand-on-click>
                 <!-- 👉 template for job description  -->
                 <template #expanded-row="slotProps">

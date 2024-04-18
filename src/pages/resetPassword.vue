@@ -17,8 +17,9 @@ import 'vue3-toastify/dist/index.css'
 
 const refVForm = ref<VForm>()
 const store = useAuthStore()
+const {username,handleLogout} = store
 const loginData = ref({
-  email: store.username,
+  email: username,
   oldPassword: '',
   newPassword: ''
 })
@@ -41,7 +42,7 @@ const handlePasswordReset = async () => {
           },
         })
         if (response) {
-          store.handleLogout()
+          handleLogout()
           router.push('/login')
           loginData.value.email = ""
           loginData.value.oldPassword = ""
@@ -56,7 +57,7 @@ const handlePasswordReset = async () => {
         })
       }finally{
         loginData.value = {
-        email: store.username,
+        email: username,
         oldPassword: '',
         newPassword: ''
       }

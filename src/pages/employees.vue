@@ -5,7 +5,7 @@ import { VDataTable } from "vuetify/labs/VDataTable"
 import AddNewEmployeeDrawer from "@/demos/forms/AddNewEmployeeDrawer.vue"
 import DeleteEmployeeDialogBasic from '@/demos/forms/DeleteEmployeeDialogBasic.vue'
 import { useAuthStore } from '@/store/useAuthStore'
-
+import { storeToRefs } from 'pinia'
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false)
 const employeeEditid = ref<number | any>()
@@ -16,7 +16,10 @@ const selectedRole = ref<string>()
 
 // constants
 const store = useEmployeesStore()
+const {employees,cmpEmployees} = storeToRefs(store)
+const {getAllEmployees,getCompanyEmployees,storedCmpName} = store
 const aStore = useAuthStore()
+const {userRole} = aStore
 const status = ['cmp_admin', 'employee']
 
 const headers = [
@@ -34,20 +37,20 @@ const dialogClose = (e: any) => {
     isAddNewUserDrawerVisible.value = false
     employeeEditid.value = null
     if (e) {
-        store.getCompanyEmployees()
-        if (aStore.userRole === 'admin') {
-            store.getAllEmployees()
+        getCompanyEmployees()
+        if (userRole === 'admin') {
+            getAllEmployees()
         }
     }
 }
 
-//handle employee create
+// handle employee create
 const handleEmployeeCreate = () => {
     isAddNewUserDrawerVisible.value = true
     employeeEditid.value = null
 }
 
-//handle employee edit
+// handle employee edit
 const handleEmployeeEdit = (employeeId: number) => {
     employeeEditid.value = employeeId
     isAddNewUserDrawerVisible.value = true
@@ -61,10 +64,10 @@ const handleEmployeeDelete = (employeeId: number) => {
 
 // handle employee search by name
 const handleSearch = useDebounceFn(() => {
-    if (aStore.userRole === 'admin') {
-        store.getAllEmployees(searchQuery.value, selectedRole.value)
+    if (userRole === 'admin') {
+        getAllEmployees(searchQuery.value, selectedRole.value)
     } else {
-        store.getCompanyEmployees(searchQuery.value)
+        getCompanyEmployees(searchQuery.value)
     }
 }, 500)
 
@@ -75,10 +78,10 @@ watch(selectedRole, async (newSelectedRole, oldSelectedRole) => {
 
 // list all the employees when the component first mounts
 onMounted(() => {
-    if (aStore.userRole === 'admin') {
-        store.getAllEmployees()
+    if (userRole === 'admin') {
+        getAllEmployees()
     } else {
-        store.getCompanyEmployees()
+        getCompanyEmployees()
     }
 })
 </script>
@@ -95,22 +98,22 @@ onMounted(() => {
 
         <!-- 👉 Search and filter -->
         <VRow class="my-2">
-            <VCol :cols="aStore.userRole === 'admin' ? 8 : 12">
+            <VCol :cols="userRole === 'admin' ? 8 : 12">
                 <div class="invoice-list-search">
                     <AppTextField placeholder="Search By First Name" density="compact" v-model="searchQuery"
                         @input="handleSearch" prepend-inner-icon="tabler-search" />
                 </div>
             </VCol>
-            <VCol cols="4" v-if="aStore.userRole === 'admin'">
+            <VCol cols="4" v-if="userRole === 'admin'">
                 <AppSelect :items="status" placeholder="Role" clearable v-model="selectedRole"></AppSelect>
             </VCol>
         </VRow>
 
 
         <!-- show all employees of all the companies if user is Admin  -->
-        <div v-if="aStore.userRole === 'admin'">
+        <div v-if="userRole === 'admin'">
             <!-- 👉 data table employees data -->
-            <VDataTable :headers="headers" :items="store.employees" :items-per-page="10" class="pa-3">
+            <VDataTable :headers="headers" :items="employees" :items-per-page="10" class="pa-3">
                 <!-- 👉 template for employee actions edit/delete -->
                 <template #item.actions="{ item }">
                     <div class="d-flex gap-1">
@@ -133,9 +136,9 @@ onMounted(() => {
         <!--  -->
 
         <!-- show all employees of all a perticular company  -->
-        <div v-if="aStore.userRole === 'cmp_admin'">
+        <div v-if="userRole === 'cmp_admin'">
             <!-- 👉 data table employees data -->
-            <VDataTable :headers="headers" :items="store.cmpEmployees" :items-per-page="10" class="pa-3">
+            <VDataTable :headers="headers" :items="cmpEmployees" :items-per-page="10" class="pa-3">
                 <!-- 👉 template for employee actions edit/delete -->
                 <template #item.actions="{ item }">
                     <div class="d-flex gap-1">
@@ -155,7 +158,7 @@ onMounted(() => {
                 </template>
                 <!-- 👉 template for employee company name  -->
                 <template #item.company_name="{ item }">
-                    {{ store.storedCmpName[0] }}
+                    {{ storedCmpName[0] }}
                 </template>
             </VDataTable>
         </div>
