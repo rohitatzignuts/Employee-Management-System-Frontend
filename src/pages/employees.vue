@@ -30,12 +30,14 @@ const headers = [
 ]
 
 // when dialog is closed clear employeeEditid and recall the employees list
-const dialogClose = () => {
+const dialogClose = (e: any) => {
     isAddNewUserDrawerVisible.value = false
     employeeEditid.value = null
-    store.getCompanyEmployees()
-    if (aStore.userRole === 'admin') {
-        store.getAllEmployees()
+    if (e) {
+        store.getCompanyEmployees()
+        if (aStore.userRole === 'admin') {
+            store.getAllEmployees()
+        }
     }
 }
 
@@ -75,7 +77,7 @@ watch(selectedRole, async (newSelectedRole, oldSelectedRole) => {
 onMounted(() => {
     if (aStore.userRole === 'admin') {
         store.getAllEmployees()
-    }else {
+    } else {
         store.getCompanyEmployees()
     }
 })
@@ -92,7 +94,7 @@ onMounted(() => {
         <VDivider class="my-4" />
 
         <!-- 👉 Search and filter -->
-        <VRow class="my-2" v-if="store.employees.length || store.cmpEmployees.length">
+        <VRow class="my-2">
             <VCol :cols="aStore.userRole === 'admin' ? 8 : 12">
                 <div class="invoice-list-search">
                     <AppTextField placeholder="Search By First Name" density="compact" v-model="searchQuery"
@@ -160,7 +162,7 @@ onMounted(() => {
 
         <!-- 👉 drawer for adding and editing employees  -->
         <AddNewEmployeeDrawer :employee-id="employeeEditid" :is-drawer-open="isAddNewUserDrawerVisible"
-            @close-dialog="dialogClose" />
+            @close-dialog="dialogClose" @is-employee-created="dialogClose" />
         <!-- 👉 dialog for deleting companies -->
         <DeleteEmployeeDialogBasic :isDialogVisible="deleteCompanyDialog" :employee-id="employeeDeleteid"
             @isDeleteDialogVisible="deleteCompanyDialog = false" />

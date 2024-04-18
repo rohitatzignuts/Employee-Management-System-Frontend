@@ -13,6 +13,7 @@ import 'vue3-toastify/dist/index.css';
 
 interface Emit {
   (e: 'closeDialog', value: Boolean): void,
+  (e: 'isEmployeeCreated', value: Boolean): void,
 }
 
 interface Props {
@@ -97,6 +98,7 @@ const onSubmit = async () => {
         });
         if (response) {
           isEditing.value = false;
+          emit('isEmployeeCreated', true)
           toast(`${response.data.message}`, {
             "type": "success",
           });

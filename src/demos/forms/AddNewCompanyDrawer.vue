@@ -15,6 +15,7 @@ interface Props {
 
 interface Emit {
   (e: 'closeDialog', value: Boolean): void
+  (e: 'isCompanyCreated', value: Boolean): void
 }
 
 const props = defineProps<Props>()
@@ -56,7 +57,7 @@ const closeNavigationDrawer = () => {
     companyData.value.logo = ''
     cmpAdminData.value.joining_date = null
     refForm.value?.resetValidation()
-    logoFile.value = null
+    logoFile.value = ''
   })
 }
 
@@ -72,13 +73,13 @@ const getCompanyData = async (comId: string | number) => {
     })
 
     companyData.value.name = response.data.data.name,
-    companyData.value.location = response.data.data.location,
-    companyData.value.cmp_email = response.data.data.cmp_email,
-    companyData.value.is_active = response.data.data.is_active,
-    companyData.value.logo = response.data.data.logo,
-    companyData.value.website = response.data.data.website,
+      companyData.value.location = response.data.data.location,
+      companyData.value.cmp_email = response.data.data.cmp_email,
+      companyData.value.is_active = response.data.data.is_active,
+      companyData.value.logo = response.data.data.logo,
+      companyData.value.website = response.data.data.website,
 
-    cmpAdminData.value.email = response.data.data.company_admin.email
+      cmpAdminData.value.email = response.data.data.company_admin.email
     cmpAdminData.value.first_name = response.data.data.company_admin.first_name
     cmpAdminData.value.joining_date = response.data.data.company_admin.joining_date
     cmpAdminData.value.last_name = response.data.data.company_admin.last_name
@@ -126,6 +127,7 @@ const onSubmit = async () => {
           }
         });
         if (response) {
+          emit('isCompanyCreated', true)
           toast(`${response.data.message}`, {
             "type": "success",
           })
@@ -195,7 +197,7 @@ watchEffect(() => {
               <VCol cols="12" v-if="!props.companyId">
                 <VLabel class="text-subtitle-2 pb-4">Company Logo</VLabel>
                 <input type="file" accept="image/*" @change="onLogoChange" label="Company Logo"
-                  prepend-icon="mdi-camera"  :rules="[]" />
+                  prepend-icon="mdi-camera" :rules="[]" />
               </VCol>
 
               <VDivider class="my-4" />

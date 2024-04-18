@@ -48,13 +48,15 @@ const handleJobDelete = (id: number) => {
 }
 
 // when dialog is closed clear jobEditid and recall the jobs list
-const dialogClose = () => {
+const dialogClose = (e) => {
     isAddNewUserDrawerVisible.value = false
     jobEditid.value = null
-    if (aStore.userRole === 'admin') {
-        jStore.getAllJobs()
+    if (e) {
+        if (aStore.userRole === 'admin') {
+            jStore.getAllJobs()
+        }
+        jStore.getJobsByCompany()
     }
-    jStore.getJobsByCompany()
 }
 
 // handle job title search
@@ -80,10 +82,10 @@ watch(selectedCompany, (newSelectedCompany, oldSelectedCompany) => {
 onMounted(() => {
     if (aStore.userRole === 'admin') {
         jStore.getAllJobs()
-    }else{
+    } else {
         jStore.getJobsByCompany()
     }
-    if(cStore.companies.length>1){
+    if (cStore.companies.length > 1) {
         cStore.getAllRegisteredCompanies()
     }
 })
@@ -98,9 +100,8 @@ onMounted(() => {
             </VBtn>
         </div>
         <VDivider class="my-4" />
-
         <!-- 👉 Search and filter -->
-        <VRow class="my-2" v-if="jStore.totaljobs.length || jStore.totalJobsByCompanies.length">
+        <VRow class="my-2">
             <VCol :cols="aStore.userRole === 'admin' ? 8 : 12">
                 <div class="invoice-list-search">
                     <AppTextField placeholder="Search By Job Title" density="compact" v-model="searchQuery"
@@ -204,7 +205,7 @@ onMounted(() => {
 
         <!-- 👉 drawer for adding and editing jobs  -->
         <AddNewJobDrawer :is-drawer-open="isAddNewUserDrawerVisible" @close-dialog="dialogClose"
-            :existing-job-id="jobEditid" />
+            :existing-job-id="jobEditid" @is-job-created="dialogClose" />
         <!-- 👉 dialog for deleting jobs -->
         <DeleteJobDialogBasic :isDialogVisible="deleteJobDialog" :delete-id="jobDeleteid"
             @isDeleteDialogVisible="deleteJobDialog = false" />

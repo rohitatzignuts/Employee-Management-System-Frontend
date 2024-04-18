@@ -14,10 +14,10 @@ import miscMaskLight from '@images/pages/misc-mask-light.png'
 
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false);
-const companyEditId = ref< number | any>();
+const companyEditId = ref<number | any>();
 const deleteCompanyDialog = ref<boolean>(false)
 const searchQuery = ref<string>('')
-const selectedStatus = ref<string|any>()
+const selectedStatus = ref<string | any>()
 
 // constants
 const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
@@ -45,33 +45,35 @@ const handleEditCompany = (companyId: number) => {
 };
 
 // handle delete company
-const handleCompanyDelete = (companyId:  number) => {
+const handleCompanyDelete = (companyId: number) => {
   deleteCompanyDialog.value = true;
   companyEditId.value = companyId;
 };
 
 // when dialog is closed clear companyEditId and recall the companies list
-const dialogClose = () => {
+const dialogClose = (e: any) => {
   isAddNewUserDrawerVisible.value = false
   companyEditId.value = null
-  store.getAllCompanies()
+  if (e) {
+    store.getAllCompanies()
+  }
 }
 
 // handle company search
 const handleSearch = useDebounceFn(() => {
-  if(aStore.userRole === 'admin'){
-    store.getAllCompanies(searchQuery.value,selectedStatus.value)
+  if (aStore.userRole === 'admin') {
+    store.getAllCompanies(searchQuery.value, selectedStatus.value)
   }
 }, 500)
 
 // recall the handleSearch() when select item changes
-watch(selectedStatus, async(newSelectedStatus,oldSelectedStatus)=> {
+watch(selectedStatus, async (newSelectedStatus, oldSelectedStatus) => {
   handleSearch()
 })
 
 // list all the companies when the component first mounts
 onMounted(() => {
-  if(aStore.userRole === 'admin'){
+  if (aStore.userRole === 'admin') {
     store.getAllCompanies()
   }
 })
@@ -92,15 +94,15 @@ onMounted(() => {
       <VDivider class="my-4" />
 
       <!-- 👉 Search and filter -->
-      <VRow class="my-2" v-if="store.companies.length">
+      <VRow class="my-2">
         <VCol cols="8">
           <div class="invoice-list-search">
-            <AppTextField placeholder="Search By Name" density="compact"  v-model="searchQuery"
-              @input="handleSearch" prepend-inner-icon="tabler-search" />
+            <AppTextField placeholder="Search By Name" density="compact" v-model="searchQuery" @input="handleSearch"
+              prepend-inner-icon="tabler-search" />
           </div>
         </VCol>
         <VCol cols="4">
-          <AppSelect :items="['active','in-active']" placeholder="Status" clearable v-model="selectedStatus"/>
+          <AppSelect :items="['active', 'in-active']" placeholder="Status" clearable v-model="selectedStatus" />
         </VCol>
       </VRow>
 
@@ -151,7 +153,7 @@ onMounted(() => {
 
       <!-- 👉 drawer for adding and editing companies  -->
       <AddNewCompanyDrawer :is-drawer-open="isAddNewUserDrawerVisible" :company-id="companyEditId"
-        @closeDialog="dialogClose" />
+        @closeDialog="dialogClose" @is-company-created="dialogClose" />
       <!-- 👉 dialog for deleting companies -->
       <DeleteCompanyDialogBasic :isDialogVisible="deleteCompanyDialog" :deleteId="companyEditId"
         @isDeleteDialogVisible="deleteCompanyDialog = false" />
