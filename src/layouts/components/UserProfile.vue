@@ -31,15 +31,6 @@ const store = useAuthStore()
 
           <VDivider class="my-2" />
 
-          <!-- 👉 Profile -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon class="me-2" icon="tabler-user" size="22" />
-            </template>
-
-            <VListItemTitle>Profile</VListItemTitle>
-          </VListItem>
-
           <!-- 👉 reset password -->
           <VListItem link>
             <template #prepend>

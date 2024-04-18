@@ -16,8 +16,8 @@ export const useJobsStore = defineStore("jobs", () => {
                     term,company
                 }
             })
-            totaljobs.value = response.data.data
-            totalJobsCount.value = response.data.data.length
+            totaljobs.value = response.data.data ?? []
+            totalJobsCount.value =  response.data.data?.length ?? 0
         } catch (error) {
             console.error('Error fetching jobs', error)
         } finally {
@@ -34,8 +34,8 @@ export const useJobsStore = defineStore("jobs", () => {
                     Authorization: `Bearer ${access_token}`,
                 }
             })
-            totalJobsByCompanies.value = response.data
-            totalJobsCountByCompany.value = response.data.length
+            totalJobsByCompanies.value = response.data ?? []
+            totalJobsCountByCompany.value = response.data?.length ?? 0
             
         } catch (error) {
             console.error('Error fetching jobs', error)

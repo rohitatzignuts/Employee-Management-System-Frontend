@@ -28,7 +28,7 @@ const refForm = ref<VForm>()
 const getCompanyId = ref<string | number | null>(props.companyId ?? null)
 const companyData = ref({
   'name': '',
-  'logo': undefined,
+  'logo': '',
   'website': '',
   'cmp_email': '',
   'location': '',
@@ -38,7 +38,7 @@ const cmpAdminData = ref({
   'first_name': '',
   'last_name': '',
   'email': '',
-  'joining_date': '',
+  'joining_date': null,
 })
 
 // 👉 select different image/logo
@@ -53,7 +53,10 @@ const closeNavigationDrawer = () => {
 
   nextTick(() => {
     refForm.value?.reset()
+    companyData.value.logo = ''
+    cmpAdminData.value.joining_date = null
     refForm.value?.resetValidation()
+    logoFile.value = null
   })
 }
 
@@ -82,7 +85,7 @@ const getCompanyData = async (comId: string | number) => {
     // clear getCompanyId
     getCompanyId.value = null
     // manage active/ deactive state of the company
-    if (response.data.data.company_admin.is_active) {
+    if (response.data.data.is_active) {
       companyData.value.is_active = true
     } else {
       companyData.value.is_active = false
@@ -107,7 +110,7 @@ const onSubmit = async () => {
           'website': companyData.value.website,
           'cmp_email': companyData.value.cmp_email,
           'location': companyData.value.location,
-          'is_active': companyData.value.is_active ? 0 : 1,
+          'is_active': companyData.value.is_active ? 1 : 0,
           'first_name': cmpAdminData.value.first_name,
           'last_name': cmpAdminData.value.last_name,
           'email': cmpAdminData.value.email,
@@ -183,16 +186,16 @@ watchEffect(() => {
                 <AppTextField v-model="companyData.website" :rules="[requiredValidator]" label="Company Website" />
               </VCol>
 
-              <!-- 👉 company website -->
+              <!-- 👉 company address -->
               <VCol cols="12">
                 <AppTextField v-model="companyData.location" :rules="[requiredValidator]" label="Company Address" />
               </VCol>
 
-              <!-- 👉 Logo -->
+              <!-- 👉 company Logo -->
               <VCol cols="12" v-if="!props.companyId">
                 <VLabel class="text-subtitle-2 pb-4">Company Logo</VLabel>
                 <input type="file" accept="image/*" @change="onLogoChange" label="Company Logo"
-                  prepend-icon="mdi-camera" />
+                  prepend-icon="mdi-camera"  :rules="[]" />
               </VCol>
 
               <VDivider class="my-4" />

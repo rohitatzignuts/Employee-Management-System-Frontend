@@ -19,8 +19,8 @@ export const useCompanyStore = defineStore('companies', () => {
                 }
             })
             if (response.data) {
-                companies.value = response.data.data
-                totalCompanies.value = response.data.data.length
+                companies.value = response.data.data ?? []
+                totalCompanies.value = response.data.data?.length ?? 0
             } else {
                 console.log('No Companies For Now....')
             }
@@ -34,7 +34,7 @@ export const useCompanyStore = defineStore('companies', () => {
     const getAllRegisteredCompanies = async () => {
         try{
             const response = await axios.get('registeredCompanies')
-            registeredCompanies.value = response.data
+            registeredCompanies.value = response.data ?? []
         }catch(error:any){
             console.log(error)
         }

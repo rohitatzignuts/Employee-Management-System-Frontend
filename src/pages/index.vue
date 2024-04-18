@@ -17,9 +17,10 @@ onMounted(() => {
   if (aStore.userRole === "admin") {
     store.getAllCompanies()
     jStore.getAllJobs();
+  }else{
+    eStore.getCompanyEmployees()
+    jStore.getJobsByCompany()
   }
-  eStore.getCompanyEmployees()
-  jStore.getJobsByCompany()
 })
 </script>
 

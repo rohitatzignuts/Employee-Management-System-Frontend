@@ -8,8 +8,8 @@ import { useAuthStore } from '@/store/useAuthStore'
 
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false)
-const employeeEditid = ref<string | number | any>()
-const employeeDeleteid = ref<string | number | any>()
+const employeeEditid = ref<number | any>()
+const employeeDeleteid = ref<number | any>()
 const deleteCompanyDialog = ref<boolean>(false)
 const searchQuery = ref<string>('')
 const selectedRole = ref<string>()
@@ -18,6 +18,7 @@ const selectedRole = ref<string>()
 const store = useEmployeesStore()
 const aStore = useAuthStore()
 const status = ['cmp_admin', 'employee']
+
 const headers = [
     { title: "NAME", key: "first_name", },
     { title: "EMAIL", key: "email" },
@@ -74,7 +75,7 @@ watch(selectedRole, async (newSelectedRole, oldSelectedRole) => {
 onMounted(() => {
     if (aStore.userRole === 'admin') {
         store.getAllEmployees()
-    } else {
+    }else {
         store.getCompanyEmployees()
     }
 })
@@ -91,7 +92,7 @@ onMounted(() => {
         <VDivider class="my-4" />
 
         <!-- 👉 Search and filter -->
-        <VRow class="my-2">
+        <VRow class="my-2" v-if="store.employees.length || store.cmpEmployees.length">
             <VCol :cols="aStore.userRole === 'admin' ? 8 : 12">
                 <div class="invoice-list-search">
                     <AppTextField placeholder="Search By First Name" density="compact" v-model="searchQuery"

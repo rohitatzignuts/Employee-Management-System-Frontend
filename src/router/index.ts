@@ -16,16 +16,14 @@ router.beforeEach((to, from, next) => {
   const isAuthenticated = access_token !== null;
 
   if (to.path !== '/login' && !isAuthenticated) {
-    next('/login'); // Redirect to login only if not already on the login page
+    next('/login'); // Redirect to login if not authenticated and trying to access any route other than /login
+  } else if (to.path === '/login' && isAuthenticated) {
+    next('/'); // Redirect to home if authenticated user tries to access /login
   } else {
     next(); // Continue navigation
   }
-  // if (to.name === 'companies' && (userRole && userRole !== 'admin')) {
-  //   next('/');
-  // } else {
-  //   next();
-  // }
 });
+
 
 // Docs: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
 export default router

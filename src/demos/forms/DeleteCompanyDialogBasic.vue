@@ -7,7 +7,7 @@ import 'vue3-toastify/dist/index.css';
 
 const props = defineProps<{
   isDialogVisible: boolean,
-  deleteId: number | string
+  deleteId: number | undefined
 }>()
 
 const emit = defineEmits<{
@@ -28,7 +28,7 @@ const handleCancel = () => {
 }
 
 // handle item delete
-const handleCompanyDelete = async (companyId: string | number) => {
+const handleCompanyDelete = async (companyId: number | undefined) => {
   const access_token = localStorage.getItem("access_token");
   try {
     if (access_token) {

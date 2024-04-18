@@ -56,11 +56,6 @@ const handleLogin = async () => {
         toast(`Invalid Credentials : ${e.message}`, {
           type: "error",
         })
-      } finally {
-        loginData.value = {
-          email: '',
-          password: '',
-        }
       }
     }
   })

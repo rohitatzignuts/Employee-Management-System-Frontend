@@ -8,13 +8,13 @@ import { useAuthStore } from '@/store/useAuthStore'
 import { useCompanyStore } from "@/store/useCompanyStore"
 
 // ref variables
-const isAddNewUserDrawerVisible = ref<Boolean>(false)
-const jobEditid = ref<string | number | any>()
-const jobDeleteid = ref<string | number | any>()
+const isAddNewUserDrawerVisible = ref<boolean>(false)
+const jobEditid = ref<number | any>()
+const jobDeleteid = ref<number | any>()
 const deleteJobDialog = ref<boolean>(false)
 const searchQuery = ref<string>('')
 const selectCompanies = ref<Array<string>>([])
-const selectedCompany = ref<string | undefined>(undefined)
+const selectedCompany = ref<string | any>()
 
 // constants
 const jStore = useJobsStore()
@@ -36,13 +36,13 @@ const handleJobCreate = () => {
 }
 
 // handle job edit 
-const handleJobEdit = (id: string | number) => {
+const handleJobEdit = (id: number) => {
     jobEditid.value = id
     isAddNewUserDrawerVisible.value = true
 }
 
 // handle job delete 
-const handleJobDelete = (id: string | number) => {
+const handleJobDelete = (id: number) => {
     deleteJobDialog.value = true
     jobDeleteid.value = id
 }
@@ -80,9 +80,12 @@ watch(selectedCompany, (newSelectedCompany, oldSelectedCompany) => {
 onMounted(() => {
     if (aStore.userRole === 'admin') {
         jStore.getAllJobs()
+    }else{
+        jStore.getJobsByCompany()
     }
-    jStore.getJobsByCompany()
-    cStore.getAllRegisteredCompanies()
+    if(cStore.companies.length>1){
+        cStore.getAllRegisteredCompanies()
+    }
 })
 </script>
 
@@ -111,7 +114,6 @@ onMounted(() => {
                 </div>
             </VCol>
         </VRow>
-
 
         <!-- show this if user is of type 'admin' -->
         <div v-if="aStore.userRole === 'admin'">

@@ -12,7 +12,7 @@ import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
 interface Emit {
-  (e: 'closeDialog', value: Boolean): void
+  (e: 'closeDialog', value: Boolean): void,
 }
 
 interface Props {
@@ -33,7 +33,7 @@ const empData = ref({
   "first_name": "",
   "last_name": "",
   "email": "",
-  "joining_date": "",
+  "joining_date": null,
   "company_name": undefined
 })
 
@@ -49,6 +49,7 @@ const closeNavigationDrawer = () => {
 
   nextTick(() => {
     refForm.value?.reset()
+    empData.value.joining_date = null
     refForm.value?.resetValidation()
   })
 }

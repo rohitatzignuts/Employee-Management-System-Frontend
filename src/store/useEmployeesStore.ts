@@ -24,7 +24,7 @@ export const useEmployeesStore = defineStore('employees', () => {
                     status 
                 }
             });
-            employees.value = response.data;
+            employees.value = response.data ?? [];
         } catch (error) {
             console.error('Error fetching employees:', error);
         }
@@ -42,8 +42,8 @@ export const useEmployeesStore = defineStore('employees', () => {
                     term ,status 
                 }
             });
-            cmpEmployees.value = response.data.data;
-            cmpEmployeeCount.value = response.data.data.length;
+            cmpEmployees.value = response.data.data ?? []
+            cmpEmployeeCount.value = response.data.data?.length ?? 0
         } catch (error) {
             console.error('Error fetching company employees:', error);
         }

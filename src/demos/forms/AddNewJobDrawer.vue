@@ -13,6 +13,7 @@ import 'vue3-toastify/dist/index.css'
 
 interface Emit {
   (e: 'closeDialog', value: Boolean): void
+  (e: 'actionCanceled', value: Boolean): void
 }
 
 interface Props {
@@ -24,8 +25,9 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 
 // 👉 ref variables
-const isEditing = ref<Boolean>(false)
-const isFormValid = ref(false)
+const isEditing = ref<boolean>(false)
+const isFormValid = ref<boolean>(false)
+const isActionCanceled = ref<boolean>(true)
 const refForm = ref<VForm>()
 const getEmployeeId = ref<string | number | null>(props.existingJobId ?? null)
 let resisteredCompanies = ref([])
@@ -47,6 +49,7 @@ const aStore = useAuthStore()
 // 👉 drawer close
 const closeNavigationDrawer = () => {
   emit('closeDialog', false)
+  emit('actionCanceled',true)
   isEditing.value = false
 
   nextTick(() => {
@@ -104,10 +107,10 @@ const onSubmit = async () => {
         })
         if (response.data.status == '200') {
           isEditing.value = false
+          isActionCanceled.value = false
           toast(`${response.data.message}`, {
             "type": "success",
           })
-          console.log(response.data.message)
           closeNavigationDrawer()
         } else {
           toast(`${response.data.message}`, {

@@ -14,10 +14,10 @@ import miscMaskLight from '@images/pages/misc-mask-light.png'
 
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false);
-const companyEditId = ref<string | number | any>();
+const companyEditId = ref< number | any>();
 const deleteCompanyDialog = ref<boolean>(false)
 const searchQuery = ref<string>('')
-const selectedStatus = ref<string|undefined>()
+const selectedStatus = ref<string|any>()
 
 // constants
 const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
@@ -39,13 +39,13 @@ const createCompany = () => {
 };
 
 // handle edit company
-const handleEditCompany = (companyId: string | number) => {
+const handleEditCompany = (companyId: number) => {
   isAddNewUserDrawerVisible.value = true;
   companyEditId.value = companyId;
 };
 
 // handle delete company
-const handleCompanyDelete = (companyId: string | number) => {
+const handleCompanyDelete = (companyId:  number) => {
   deleteCompanyDialog.value = true;
   companyEditId.value = companyId;
 };
@@ -92,7 +92,7 @@ onMounted(() => {
       <VDivider class="my-4" />
 
       <!-- 👉 Search and filter -->
-      <VRow class="my-2">
+      <VRow class="my-2" v-if="store.companies.length">
         <VCol cols="8">
           <div class="invoice-list-search">
             <AppTextField placeholder="Search By Name" density="compact"  v-model="searchQuery"
