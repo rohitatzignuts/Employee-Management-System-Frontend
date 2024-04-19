@@ -4,29 +4,30 @@ import DeleteCompanyDialogBasic from "../demos/forms/DeleteCompanyDialogBasic.vu
 import { VDataTable } from "vuetify/labs/VDataTable";
 import { ref, onMounted } from "vue";
 import { avatarText } from "@/@core/utils/formatters";
-import { useCompanyStore } from '../store/useCompanyStore'
-import misc404 from '@images/pages/404.png'
+import { useCompanyStore } from "../store/useCompanyStore";
+import misc404 from "@images/pages/404.png";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useDebounceFn } from '@vueuse/core'
-import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import miscMaskDark from '@images/pages/misc-mask-dsark.png'
-import miscMaskLight from '@images/pages/misc-mask-light.png'
+import { useDebounceFn } from "@vueuse/core";
+import { useGenerateImageVariant } from "@core/composable/useGenerateImageVariant";
+import miscMaskDark from "@images/pages/misc-mask-dsark.png";
+import miscMaskLight from "@images/pages/misc-mask-light.png";
 import { storeToRefs } from "pinia";
 
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false);
 const companyEditId = ref<number | any>();
-const deleteCompanyDialog = ref<boolean>(false)
-const searchQuery = ref<string>('')
-const selectedStatus = ref<string | any>()
+const deleteCompanyDialog = ref<boolean>(false);
+const searchQuery = ref<string>("");
+const selectedStatus = ref<string | any>();
 
 // constants
-const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
-const store = useCompanyStore()
-const {totalCompanies,isLoading,companies,registeredCompanies} = storeToRefs(store)
-const {getAllCompanies} = store
-const aStore = useAuthStore()
-const {userRole} = aStore
+const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark);
+const store = useCompanyStore();
+const { totalCompanies, isLoading, companies, registeredCompanies } =
+  storeToRefs(store);
+const { getAllCompanies } = store;
+const aStore = useAuthStore();
+const { userRole } = aStore;
 
 const headers = [
   { title: "NAME", key: "name" },
@@ -56,39 +57,37 @@ const handleCompanyDelete = (companyId: number) => {
 
 // when dialog is closed clear companyEditId and recall the companies list
 const dialogClose = (e: any) => {
-  isAddNewUserDrawerVisible.value = false
-  companyEditId.value = null
+  isAddNewUserDrawerVisible.value = false;
+  companyEditId.value = null;
   if (e) {
-    getAllCompanies()
+    getAllCompanies();
   }
-}
+};
 
 // handle company search
 const handleSearch = useDebounceFn(() => {
-  if (userRole === 'admin') {
-    getAllCompanies(searchQuery.value, selectedStatus.value)
+  if (userRole === "admin") {
+    getAllCompanies(searchQuery.value, selectedStatus.value);
   }
-}, 500)
+}, 500);
 
 // recall the handleSearch() when select item changes
 watch(selectedStatus, async (newSelectedStatus, oldSelectedStatus) => {
-  handleSearch()
-})
+  handleSearch();
+});
 
 // list all the companies when the component first mounts
 onMounted(() => {
-  if (userRole === 'admin') {
-    getAllCompanies()
+  if (userRole === "admin") {
+    getAllCompanies();
   }
-})
+});
 </script>
 
 <template>
   <div>
-
     <!-- 👉 make companies section visible to only super admin(admin) -->
     <div v-if="userRole === 'admin'">
-
       <div class="d-flex align-center justify-space-between">
         <h1>Companies</h1>
         <VBtn prepend-icon="tabler-plus" @click="createCompany">
@@ -101,25 +100,39 @@ onMounted(() => {
       <VRow class="my-2">
         <VCol cols="8">
           <div class="invoice-list-search">
-            <AppTextField placeholder="Search By Name" density="compact" v-model="searchQuery" @input="handleSearch"
-              prepend-inner-icon="tabler-search" />
+            <AppTextField
+              v-model="searchQuery"
+              density="compact"
+              prepend-inner-icon="tabler-search"
+              placeholder="Search By Name"
+              @input="handleSearch"
+            />
           </div>
         </VCol>
         <VCol cols="4">
-          <AppSelect :items="['active', 'in-active']" placeholder="Status" clearable v-model="selectedStatus" />
+          <AppSelect
+            v-model="selectedStatus"
+            :items="['active', 'in-active']"
+            clearable
+            placeholder="Status"
+          />
         </VCol>
       </VRow>
 
       <!-- 👉 data table for companies data -->
-      <VDataTable :headers="headers" :items="companies" :items-per-page="10" class="pa-3">
-
+      <VDataTable
+        class="pa-3"
+        :headers="headers"
+        :items="companies"
+        :items-per-page="10"
+      >
         <!-- 👉 template for company status  -->
         <template #item.is_active="{ item }">
           <div>
-            <VChip color="success" v-if="item.props.title.is_active == 1">
+            <VChip v-if="item.props.title.is_active == 1" color="success">
               active
             </VChip>
-            <VChip color="secondary" v-else> in-active </VChip>
+            <VChip v-else color="secondary"> in-active </VChip>
           </div>
         </template>
 
@@ -127,16 +140,24 @@ onMounted(() => {
         <template #item.name="{ item }">
           <div class="d-flex align-center">
             <!-- avatar -->
-            <VAvatar size="32" :color="item.avatar ? '' : 'primary'"
+            <VAvatar
+              :color="item.avatar ? '' : 'primary'"
               :class="item.avatar ? '' : 'v-avatar-light-bg primary--text'"
-              :variant="!item.avatar ? 'tonal' : undefined">
-              <VImg v-if="item.props.title.logo" :src="`http://127.0.0.1:8000/storage/${item.props.title.logo}`" />
+              :variant="!item.avatar ? 'tonal' : undefined"
+              size="32"
+            >
+              <VImg
+                v-if="item.props.title.logo"
+                :src="`http://127.0.0.1:8000/storage/${item.props.title.logo}`"
+              />
               <span v-else>{{ avatarText(item.props.title.name) }}</span>
             </VAvatar>
 
             <div class="d-flex flex-column ms-3">
-              <span class="d-block font-weight-medium text-high-emphasis text-truncate">{{ item.props.title.name
-                }}</span>
+              <span
+                class="d-block font-weight-medium text-high-emphasis text-truncate"
+                >{{ item.props.title.name }}</span
+              >
             </div>
           </div>
         </template>
@@ -152,15 +173,21 @@ onMounted(() => {
             </IconBtn>
           </div>
         </template>
-
       </VDataTable>
 
       <!-- 👉 drawer for adding and editing companies  -->
-      <AddNewCompanyDrawer :is-drawer-open="isAddNewUserDrawerVisible" :company-id="companyEditId"
-        @closeDialog="dialogClose" @is-company-created="dialogClose" />
+      <AddNewCompanyDrawer
+        :is-drawer-open="isAddNewUserDrawerVisible"
+        :company-id="companyEditId"
+        @closeDialog="dialogClose"
+        @is-company-created="dialogClose"
+      />
       <!-- 👉 dialog for deleting companies -->
-      <DeleteCompanyDialogBasic :isDialogVisible="deleteCompanyDialog" :deleteId="companyEditId"
-        @isDeleteDialogVisible="deleteCompanyDialog = false" />
+      <DeleteCompanyDialogBasic
+        :isDialogVisible="deleteCompanyDialog"
+        :deleteId="companyEditId"
+        @isDeleteDialogVisible="deleteCompanyDialog = false"
+      />
     </div>
 
     <!-- 👉 show message and misc to the non admin user-->
@@ -169,7 +196,12 @@ onMounted(() => {
         <VCard class="pa-4">
           <VCardTitle class="font-weight-bold">Unauthorized</VCardTitle>
           <VDivider />
-          <VImg :src="misc404" alt="Coming Soon" :max-width="200" class="mx-auto py-4" />
+          <VImg
+            :src="misc404"
+            :max-width="200"
+            class="mx-auto py-4"
+            alt="Coming Soon"
+          />
         </VCard>
       </div>
     </div>

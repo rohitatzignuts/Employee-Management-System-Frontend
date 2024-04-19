@@ -28,7 +28,7 @@ export const useAuthStore = defineStore("auth", () => {
             toast("Logged Out Successfully !", {
                 "type": "success",
             });
-        } catch (error) {   
+        } catch (error) {
             toast("Error Logging Out !", {
                 autoClose: 2000,
                 "type": "error",
