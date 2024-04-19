@@ -34,8 +34,8 @@ export const useJobsStore = defineStore("jobs", () => {
                     Authorization: `Bearer ${access_token}`,
                 }
             })
-            totalJobsByCompanies.value = response.data ?? []
-            totalJobsCountByCompany.value = response.data?.length ?? 0
+            totalJobsByCompanies.value = response.data.data ?? []
+            totalJobsCountByCompany.value = response.data.data?.length ?? 0
             
         } catch (error) {
             console.error('Error fetching jobs', error)

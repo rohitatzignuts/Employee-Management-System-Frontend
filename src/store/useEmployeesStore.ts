@@ -24,7 +24,7 @@ export const useEmployeesStore = defineStore('employees', () => {
                     status 
                 }
             });
-            employees.value = response.data ?? [];
+            employees.value = response.data.data ?? [];
         } catch (error) {
             console.error('Error fetching employees:', error);
         }

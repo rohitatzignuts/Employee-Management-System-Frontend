@@ -34,11 +34,11 @@ export const useCompanyStore = defineStore('companies', () => {
     const getAllRegisteredCompanies = async () => {
         try{
             const response = await axios.get('registeredCompanies')
-            registeredCompanies.value = response.data 
+            registeredCompanies.value = response.data.data
         }catch(error:any){
             console.log(error)
         }
-    }
+    }   
 
     return {
         getAllCompanies, totalCompanies, isLoading, companies,getAllRegisteredCompanies,registeredCompanies

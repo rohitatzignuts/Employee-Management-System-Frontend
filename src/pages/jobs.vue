@@ -81,7 +81,9 @@ watchEffect(() => {
     if (Array.isArray(registeredCompanies.value)) {
         selectCompanies.value = [...registeredCompanies.value];
     }
+});
 
+watch(selectedCompany, (newSelectedCompany, oldSelectedCompany) => {
     // Recall the handleSearch() when select item changes
     handleSearch();
 });
