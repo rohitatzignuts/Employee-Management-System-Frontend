@@ -64,6 +64,7 @@ const dialogClose = (e: any) => {
         getAllJobs();
         }
         getJobsByCompany();
+        getAllRegisteredCompanies();
     }
 };
 
@@ -95,9 +96,7 @@ onMounted(() => {
     } else {
         getJobsByCompany();
     }
-    if (companies.value.length > 1) {
         getAllRegisteredCompanies();
-    }
 });
 </script>
 

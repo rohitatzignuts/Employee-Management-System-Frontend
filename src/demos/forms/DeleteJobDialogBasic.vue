@@ -2,6 +2,7 @@
 import axios from "axios";
 import { ref } from "vue";
 import { useJobsStore } from "../../store/useJobsStore";
+import { useCompanyStore } from "@/store/useCompanyStore";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
@@ -16,6 +17,9 @@ const emit = defineEmits<{
 
 const deleteTypeRef = ref<"permanent" | "temporary" | null>(null);
 const store = useJobsStore();
+const { getAllJobs, getJobsByCompany } = store;
+const cStore = useCompanyStore();
+const {getAllRegisteredCompanies} = cStore
 
 const handleConfirm = () => {
   // Emit the event to indicate delete confirmation with the selected deleteType
@@ -42,8 +46,9 @@ const handleJobDelete = async (jobId: undefined | number) => {
       });
       if (response) {
         // if delete is success full recall the companies list and show toast message
-        store.getAllJobs();
-        store.getJobsByCompany();
+        getAllJobs();
+        getJobsByCompany();
+        getAllRegisteredCompanies()
         toast(`${response.data.message}`, {
           type: "success",
         });

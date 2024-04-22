@@ -34,7 +34,7 @@ export const useCompanyStore = defineStore('companies', () => {
     const getAllRegisteredCompanies = async () => {
         try{
             const response = await axios.get('registeredCompanies')
-            registeredCompanies.value = response.data.data
+            registeredCompanies.value = Array.from(new Set(response.data.data));
         }catch(error:any){
             console.log(error)
         }
