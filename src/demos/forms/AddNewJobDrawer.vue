@@ -127,7 +127,7 @@ const onSubmit = async () => {
       }
     });
   } catch (error) {
-    toast(`${error}`, {
+    toast(`Error Updating Job : ${error}`, {
       type: "error",
     });
   }

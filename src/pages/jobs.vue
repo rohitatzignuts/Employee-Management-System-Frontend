@@ -61,7 +61,7 @@ const dialogClose = (e: any) => {
     jobEditid.value = null;
     if (e) {
         if (userRole === "admin") {
-        getAllJobs();
+            getAllJobs();
         }
         getJobsByCompany();
         getAllRegisteredCompanies();
@@ -96,142 +96,115 @@ onMounted(() => {
     } else {
         getJobsByCompany();
     }
-        getAllRegisteredCompanies();
+    getAllRegisteredCompanies();
 });
 </script>
 
 <template>
     <div>
         <div class="d-flex align-center justify-space-between">
-        <h1>Jobs</h1>
-        <VBtn prepend-icon="tabler-plus" @click="handleJobCreate">
-            Add New Job
-        </VBtn>
+            <h1>Jobs</h1>
+            <VBtn prepend-icon="tabler-plus" @click="handleJobCreate">
+                Add New Job
+            </VBtn>
         </div>
         <VDivider class="my-4" />
         <!-- 👉 Search and filter -->
         <VRow class="my-2">
-        <VCol :cols="userRole === 'admin' ? 8 : 12">
-            <div class="invoice-list-search">
-            <AppTextField
-                v-model="searchQuery"
-                density="compact"
-                prepend-inner-icon="tabler-search"
-                placeholder="Search By Job Title"
-                @input="handleSearch"
-            />
-            </div>
-        </VCol>
-        <VCol v-if="userRole === 'admin'" cols="4">
-            <div>
-            <AppSelect
-                v-model="selectedCompany"
-                :items="selectCompanies"
-                clearable
-                placeholder="Select Company"
-            ></AppSelect>
-            </div>
-        </VCol>
+            <VCol :cols="userRole === 'admin' ? 8 : 12">
+                <div class="invoice-list-search">
+                    <AppTextField v-model="searchQuery" density="compact" prepend-inner-icon="tabler-search"
+                        placeholder="Search By Job Title" @input="handleSearch" />
+                </div>
+            </VCol>
+            <VCol v-if="userRole === 'admin'" cols="4">
+                <div>
+                    <AppSelect v-model="selectedCompany" :items="selectCompanies" clearable
+                        placeholder="Select Company"></AppSelect>
+                </div>
+            </VCol>
         </VRow>
 
         <!-- show this if user is of type 'admin' -->
         <div v-if="userRole === 'admin'">
-        <!-- 👉 data table for job data -->
-        <VDataTable
-            :headers="headers"
-            :items="totaljobs"
-            :items-per-page="10"
-            expand-on-click
-            class="pa-3"
-        >
-            <!-- 👉 template for job details  -->
-            <template #expanded-row="slotProps">
-            <tr class="v-data-table__tr">
-                <td :colspan="headers.length">
-                <h4 class="my-1">
-                    Description: {{ slotProps.item.raw.description }}
-                </h4>
-                <p class="my-1">Pay: ${{ slotProps.item.raw.pay }}</p>
-                </td>
-            </tr>
-            </template>
-            <!-- 👉 template for job status  -->
-            <template #item.is_active="{ item }">
-            <div class="d-flex gap-1">
-                <VChip v-if="item.raw.is_active === 0"> in-active </VChip>
-                <VChip color="success" v-else> active </VChip>
-            </div>
-            </template>
-            <!-- 👉 template for job actions edit/delete  -->
-            <template #item.actions="{ item }">
-            <div class="d-flex gap-1">
-                <IconBtn @click="handleJobEdit(item.raw.id)">
-                <VIcon icon="tabler-edit" />
-                </IconBtn>
-                <IconBtn @click="handleJobDelete(item.raw.id)">
-                <VIcon icon="tabler-trash" />
-                </IconBtn>
-            </div>
-            </template>
-        </VDataTable>
+            <!-- 👉 data table for job data -->
+            <VDataTable :headers="headers" :items="totaljobs" :items-per-page="10" expand-on-click class="pa-3">
+                <!-- 👉 template for job details  -->
+                <template #expanded-row="slotProps">
+                    <tr class="v-data-table__tr">
+                        <td :colspan="headers.length">
+                            <h4 class="my-1">
+                                Description: {{ slotProps.item.raw.description }}
+                            </h4>
+                            <p class="my-1">Pay: ${{ slotProps.item.raw.pay }}</p>
+                        </td>
+                    </tr>
+                </template>
+                <!-- 👉 template for job status  -->
+                <template #item.is_active="{ item }">
+                    <div class="d-flex gap-1">
+                        <VChip v-if="item.raw.is_active === 0"> in-active </VChip>
+                        <VChip color="success" v-else> active </VChip>
+                    </div>
+                </template>
+                <!-- 👉 template for job actions edit/delete  -->
+                <template #item.actions="{ item }">
+                    <div class="d-flex gap-1">
+                        <IconBtn @click="handleJobEdit(item.raw.id)">
+                            <VIcon icon="tabler-edit" />
+                        </IconBtn>
+                        <IconBtn @click="handleJobDelete(item.raw.id)">
+                            <VIcon icon="tabler-trash" />
+                        </IconBtn>
+                    </div>
+                </template>
+            </VDataTable>
         </div>
 
         <!-- show this if user is of type 'cmp_admin' -->
         <div v-if="userRole === 'cmp_admin'">
-        <!-- 👉 data table for jobs data -->
-        <VDataTable
-            :headers="headers"
-            :items="totalJobsByCompanies"
-            :items-per-page="10"
-            expand-on-click
-            class="pa-3"
-        >
-            <!-- 👉 template for job description  -->
-            <template #expanded-row="slotProps">
-            <tr class="v-data-table__tr">
-                <td :colspan="headers.length">
-                <h4 class="my-1">
-                    Description: {{ slotProps.item.raw.description }}
-                </h4>
-                <p class="my-1">Pay: ${{ slotProps.item.raw.pay }}</p>
-                </td>
-            </tr>
-            </template>
+            <!-- 👉 data table for jobs data -->
+            <VDataTable :headers="headers" :items="totalJobsByCompanies" :items-per-page="10" expand-on-click
+                class="pa-3">
+                <!-- 👉 template for job description  -->
+                <template #expanded-row="slotProps">
+                    <tr class="v-data-table__tr">
+                        <td :colspan="headers.length">
+                            <h4 class="my-1">
+                                Description: {{ slotProps.item.raw.description }}
+                            </h4>
+                            <p class="my-1">Pay: ${{ slotProps.item.raw.pay }}</p>
+                        </td>
+                    </tr>
+                </template>
 
-            <!-- 👉 template for job status  -->
-            <template #item.is_active="{ item }">
-            <div class="d-flex gap-1">
-                <VChip v-if="item.raw.is_active === 0"> in-active </VChip>
-                <VChip color="success" v-else> active </VChip>
-            </div>
-            </template>
+                <!-- 👉 template for job status  -->
+                <template #item.is_active="{ item }">
+                    <div class="d-flex gap-1">
+                        <VChip v-if="item.raw.is_active === 0"> in-active </VChip>
+                        <VChip color="success" v-else> active </VChip>
+                    </div>
+                </template>
 
-            <!-- 👉 template for job actions edit/delete  -->
-            <template #item.actions="{ item }">
-            <div class="d-flex gap-1">
-                <IconBtn @click="handleJobEdit(item.raw.id)">
-                <VIcon icon="tabler-edit" />
-                </IconBtn>
-                <IconBtn @click="handleJobDelete(item.raw.id)">
-                <VIcon icon="tabler-trash" />
-                </IconBtn>
-            </div>
-            </template>
-        </VDataTable>
+                <!-- 👉 template for job actions edit/delete  -->
+                <template #item.actions="{ item }">
+                    <div class="d-flex gap-1">
+                        <IconBtn @click="handleJobEdit(item.raw.id)">
+                            <VIcon icon="tabler-edit" />
+                        </IconBtn>
+                        <IconBtn @click="handleJobDelete(item.raw.id)">
+                            <VIcon icon="tabler-trash" />
+                        </IconBtn>
+                    </div>
+                </template>
+            </VDataTable>
         </div>
 
         <!-- 👉 drawer for adding and editing jobs  -->
-        <AddNewJobDrawer
-        :is-drawer-open="isAddNewUserDrawerVisible"
-        @close-dialog="dialogClose"
-        :existing-job-id="jobEditid"
-        @is-job-created="dialogClose"
-        />
+        <AddNewJobDrawer :is-drawer-open="isAddNewUserDrawerVisible" @close-dialog="dialogClose"
+            :existing-job-id="jobEditid" @is-job-created="dialogClose" />
         <!-- 👉 dialog for deleting jobs -->
-        <DeleteJobDialogBasic
-        :isDialogVisible="deleteJobDialog"
-        :delete-id="jobDeleteid"
-        @isDeleteDialogVisible="deleteJobDialog = false"
-        />
+        <DeleteJobDialogBasic :isDialogVisible="deleteJobDialog" :delete-id="jobDeleteid"
+            @isDeleteDialogVisible="deleteJobDialog = false" />
     </div>
 </template>

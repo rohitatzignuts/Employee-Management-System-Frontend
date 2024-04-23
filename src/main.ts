@@ -26,6 +26,7 @@ const app = createApp(App);
 app.use(Vue3Toastify, {
   autoClose: 3000,
   "theme": "dark",
+  "position": "bottom-left",
 } as ToastContainerOptions);
 
 app.use(VueSweetalert2, options);

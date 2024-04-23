@@ -24,6 +24,11 @@ const navItems =[
     to: { name: 'jobs' },
     icon: { icon: 'tabler-file' },
   },
+  {
+    title: 'Applicants',
+    to: { name: 'applicants' },
+    icon: { icon: 'tabler-users-group' },
+  },
 ] 
 
 // hide companies nav item when user is not super admin
