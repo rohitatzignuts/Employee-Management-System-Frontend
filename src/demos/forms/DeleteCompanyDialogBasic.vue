@@ -4,6 +4,8 @@ import { ref } from "vue";
 import { useCompanyStore } from "../../store/useCompanyStore";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import type { VForm } from "vuetify/components/VForm";
+import { requiredValidator } from "../../@core/utils/validators";
 
 const props = defineProps<{
   isDialogVisible: boolean;
@@ -15,6 +17,8 @@ const emit = defineEmits<{
 }>();
 
 const deleteTypeRef = ref<"permanent" | "temporary" | null>(null);
+const isFormValid = ref<boolean>(false);
+const refForm = ref<VForm>();
 const store = useCompanyStore();
 
 const handleConfirm = () => {
@@ -31,29 +35,36 @@ const handleCancel = () => {
 const handleCompanyDelete = async (companyId: number | undefined) => {
   const access_token = localStorage.getItem("access_token");
   try {
-    if (access_token) {
-      const response = await axios.delete(`company/${companyId}`, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-        params: {
-          deleteType: deleteTypeRef.value,
-        },
-      });
-      if (response) {
-        // if delete is success full recall the companies list and show toast message
-        store.getAllCompanies();
-        toast(`${response.data.message}`, {
-          type: "success",
-        });
-        // clear deleteTypeRef after deletion
-        deleteTypeRef.value = null;
+    refForm.value?.validate().then(async (res) => {
+      if (res.valid) {
+        if (access_token) {
+          const response = await axios.delete(`company/${companyId}`, {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+            params: {
+              deleteType: deleteTypeRef.value,
+            },
+          });
+          if (response) {
+            // if delete is success full recall the companies list and show toast message
+            store.getAllCompanies();
+            handleConfirm();
+            toast(`${response.data.message}`, {
+              type: "success",
+            });
+            // clear deleteTypeRef after deletion
+            deleteTypeRef.value = null;
+          }
+        }
       }
-    }
-  } catch (error: any) {
-    toast(`Error Deleting : ${error}`, {
-      type: "success",
     });
+  } catch (error: any) {
+    if (error.response) {
+      toast(`${error.response.data.message}`, {
+        type: "error",
+      });
+    }
   }
 };
 </script>
@@ -66,12 +77,16 @@ const handleCompanyDelete = async (companyId: number | undefined) => {
     <!-- Dialog Content -->
     <VCard title="How do you want to delete this record ?">
       <!-- Delete confirmation form  -->
-      <VForm @submit.prevent="handleCompanyDelete(props.deleteId)">
+      <VForm
+        v-model="isFormValid"
+        ref="refForm"
+        @submit.prevent="handleCompanyDelete(props.deleteId)"
+      >
         <VCardText class="demo-space-x">
           <!-- permanent checkbox  -->
           <VCheckbox
             v-model="deleteTypeRef"
-            required
+            :rules="[requiredValidator]"
             value="permanent"
             label="Permanently"
             name="deleteType"
@@ -79,7 +94,7 @@ const handleCompanyDelete = async (companyId: number | undefined) => {
           <!-- temporary checkbox  -->
           <VCheckbox
             v-model="deleteTypeRef"
-            required
+            :rules="[requiredValidator]"
             value="temporary"
             label="Temporarily"
             name="deleteType"
@@ -87,7 +102,7 @@ const handleCompanyDelete = async (companyId: number | undefined) => {
         </VCardText>
         <!-- Delete confirmation form  controls-->
         <VCardText class="d-flex justify-end gap-2">
-          <VBtn type="submit" @click="handleConfirm"> Confirm </VBtn>
+          <VBtn type="submit"> Confirm </VBtn>
           <VBtn color="secondary" @click="handleCancel"> Cancel </VBtn>
         </VCardText>
       </VForm>

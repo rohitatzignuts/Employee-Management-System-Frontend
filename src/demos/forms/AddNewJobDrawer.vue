@@ -29,8 +29,8 @@ const emit = defineEmits<Emit>();
 
 // 👉 ref variables
 const isEditing = ref<boolean>(false);
-const isFormValid = ref<boolean>(false);
 const isActionCanceled = ref<boolean>(true);
+const isFormValid = ref<boolean>(false);
 const refForm = ref<VForm>();
 const getEmployeeId = ref<string | number | null>(props.existingJobId ?? null);
 let resisteredCompanies = ref([]);
@@ -118,19 +118,18 @@ const onSubmit = async () => {
           });
           closeNavigationDrawer();
         } else {
-          toast(`${response.data.message}`, {
-            type: "error",
-          });
           refForm.value?.reset();
           refForm.value?.resetValidation();
         }
       }
     });
-  } catch (error) {
-    toast(`Error Updating Job : ${error}`, {
-      type: "error",
-    });
-  }
+  } catch (error: any) {
+        if (error.response) {
+            toast(`${error.response.data.message}`, {
+                type: "success",
+            });
+        }
+    }
 };
 
 // is user is admin then show the option of multiple companies else show only one

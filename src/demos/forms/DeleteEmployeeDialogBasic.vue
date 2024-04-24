@@ -3,8 +3,10 @@ import axios from "axios";
 import { ref } from "vue";
 import { useEmployeesStore } from "../../store/useEmployeesStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import type { VForm } from "vuetify/components/VForm";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { requiredValidator } from "../../@core/utils/validators";
 
 const props = defineProps<{
   isDialogVisible: boolean;
@@ -16,6 +18,8 @@ const emit = defineEmits<{
 }>();
 
 const deleteTypeRef = ref<"permanent" | "temporary" | null>(null);
+const isFormValid = ref<boolean>(false);
+const refForm = ref<VForm>();
 const store = useEmployeesStore();
 const aStore = useAuthStore();
 
@@ -33,29 +37,34 @@ const handleCancel = () => {
 const handleEmployeeDelete = async (employeeId: undefined | number) => {
   const access_token = localStorage.getItem("access_token");
   try {
-    if (access_token) {
-      const response = await axios.delete(`employee/${employeeId}`, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-        params: {
-          deleteType: deleteTypeRef.value,
-        },
-      });
-      if (response) {
-        // if delete is success full recall the companies list and show toast message
-        if (aStore.userRole === "admin") {
-          store.getAllEmployees();
-        } else {
-          store.getCompanyEmployees();
+    refForm.value?.validate().then(async (res) => {
+      if (res.valid) {
+        if (access_token) {
+          const response = await axios.delete(`employee/${employeeId}`, {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+            params: {
+              deleteType: deleteTypeRef.value,
+            },
+          });
+          if (response) {
+            // if delete is success full recall the companies list and show toast message
+            if (aStore.userRole === "admin") {
+              store.getAllEmployees();
+            } else {
+              store.getCompanyEmployees();
+            }
+            handleConfirm()
+            toast(`${response.data.message}`, {
+              type: "success",
+            });
+            // clear deleteTypeRef after deletion
+            deleteTypeRef.value = null;
+          }
         }
-        toast(`${response.data.message}`, {
-          type: "success",
-        });
-        // clear deleteTypeRef after deletion
-        deleteTypeRef.value = null;
       }
-    }
+    });
   } catch (error: any) {
     toast(`Error Deleting : ${error}`, {
       type: "success",
@@ -77,7 +86,7 @@ const handleEmployeeDelete = async (employeeId: undefined | number) => {
           <!-- permanent checkbox  -->
           <VCheckbox
             v-model="deleteTypeRef"
-            required
+            :rules="[requiredValidator]"
             value="permanent"
             label="Permanently"
             name="deleteType"
@@ -85,7 +94,7 @@ const handleEmployeeDelete = async (employeeId: undefined | number) => {
           <!-- permanent checkbox  -->
           <VCheckbox
             v-model="deleteTypeRef"
-            required
+            :rules="[requiredValidator]"
             value="temporary"
             label="Temporarily"
             name="deleteType"
@@ -93,7 +102,7 @@ const handleEmployeeDelete = async (employeeId: undefined | number) => {
         </VCardText>
         <!-- Delete confirmation form  controls-->
         <VCardText class="d-flex justify-end gap-2">
-          <VBtn type="submit" @click="handleConfirm"> Confirm </VBtn>
+          <VBtn type="submit"> Confirm </VBtn>
           <VBtn color="secondary" @click="handleCancel"> Cancel </VBtn>
         </VCardText>
       </VForm>

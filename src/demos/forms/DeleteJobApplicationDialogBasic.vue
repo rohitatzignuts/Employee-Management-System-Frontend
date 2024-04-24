@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import axios from "axios";
 import { ref } from "vue";
-import { useJobsStore } from "../../store/useJobsStore";
-import { useCompanyStore } from "@/store/useCompanyStore";
+import { useApplicationStore } from "../../store/useApplicationStore";
 import { toast } from "vue3-toastify";
 import type { VForm } from "vuetify/components/VForm";
 import "vue3-toastify/dist/index.css";
@@ -20,10 +19,8 @@ const emit = defineEmits<{
 const isFormValid = ref<boolean>(false);
 const refForm = ref<VForm>();
 const deleteTypeRef = ref<"permanent" | "temporary" | null>(null);
-const store = useJobsStore();
-const { getAllJobs, getJobsByCompany } = store;
-const cStore = useCompanyStore();
-const { getAllRegisteredCompanies } = cStore;
+const appStore = useApplicationStore();
+const { getAllApplicants } = appStore;
 
 const handleConfirm = () => {
   // Emit the event to indicate delete confirmation with the selected deleteType
@@ -36,13 +33,13 @@ const handleCancel = () => {
 };
 
 // handle item delete
-const handleJobDelete = async (jobId: undefined | number) => {
+const handleJobDelete = async (applicationId: undefined | number) => {
   const access_token = localStorage.getItem("access_token");
   try {
     refForm.value?.validate().then(async (res) => {
       if (res.valid) {
         if (access_token) {
-          const response = await axios.delete(`job/${jobId}`, {
+          const response = await axios.delete(`application/${applicationId}`, {
             headers: {
               Authorization: `Bearer ${access_token}`,
             },
@@ -52,9 +49,7 @@ const handleJobDelete = async (jobId: undefined | number) => {
           });
           if (response) {
             // if delete is success full recall the companies list and show toast message
-            getAllJobs();
-            getJobsByCompany();
-            getAllRegisteredCompanies();
+            getAllApplicants();
             handleConfirm();
             toast(`${response.data.message}`, {
               type: "success",

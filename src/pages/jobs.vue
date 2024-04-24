@@ -64,6 +64,7 @@ const dialogClose = (e: any) => {
             getAllJobs();
         }
         getJobsByCompany();
+        
         getAllRegisteredCompanies();
     }
 };
