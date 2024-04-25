@@ -43,13 +43,13 @@ onMounted(() => {
       <VCol cols="6">
         <!-- for super admin typeof user  -->
         <RouterLink to="/companies">
-          <VCard v-if="userRole === 'admin'">
+          <VCard v-if="userRole === 'admin'" variant="tonal">
             <VCardTitle>
               <!-- total companies count  -->
               <div>
                 <VIcon icon="mdi-office-building" /><span class="text-h1">{{
                   totalCompanies
-                }}</span>
+                  }}</span>
               </div>
             </VCardTitle>
             <VCardItem> Companies Registered </VCardItem>
@@ -57,13 +57,13 @@ onMounted(() => {
         </RouterLink>
 
         <!-- for cmp_admin typeof user  -->
-        <VCard v-if="userRole === 'cmp_admin'">
+        <VCard v-if="userRole === 'cmp_admin'" variant="tonal">
           <VCardTitle>
             <!-- total employees count  -->
             <div>
               <VIcon icon="mdi-office-building" /><span class="text-h1">{{
                 cmpEmployeeCount
-              }}</span>
+                }}</span>
             </div>
           </VCardTitle>
           <VCardItem> Employees are regitered.. </VCardItem>
@@ -73,26 +73,26 @@ onMounted(() => {
 
       <VCol cols="6">
         <!-- for super admin typeof user  -->
-        <VCard v-if="userRole === 'admin'">
+        <VCard v-if="userRole === 'admin'" variant="tonal">
           <VCardTitle>
             <!-- total job count  -->
             <div>
               <VIcon icon="mdi-file-account" /><span class="text-h1">{{
                 totalJobsCount
-              }}</span>
+                }}</span>
             </div>
           </VCardTitle>
           <VCardItem> Jobs Listed </VCardItem>
         </VCard>
 
-        <!-- for cmp_admin typeof user  -->
-        <VCard v-if="userRole === 'cmp_admin'">
+        <!-- for cmp_admin typeof user  --> 
+        <VCard v-if="userRole === 'cmp_admin'" variant="tonal">
           <VCardTitle>
             <!-- total job count of the logged in company  -->
             <div>
               <VIcon icon="mdi-file-account" /><span class="text-h1">{{
                 totalJobsCountByCompany
-              }}</span>
+                }}</span>
             </div>
           </VCardTitle>
           <VCardItem> Jobs Listed </VCardItem>
