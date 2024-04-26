@@ -42,6 +42,7 @@ const jobData = ref({
   pay: "",
   company_name: undefined,
   is_active: false,
+  is_trending: false,
 });
 
 // 👉 constants
@@ -74,11 +75,17 @@ const getJobData = async (jobId: string | number) => {
     jobData.value.location = response.data.data.location;
     jobData.value.pay = response.data.data.pay;
     jobData.value.company_name = response.data.data.company_name;
+    jobData.value.is_trending = response.data.data.is_trending;
     getEmployeeId.value = null;
     if (response.data.data.is_active) {
       jobData.value.is_active = true;
     } else {
       jobData.value.is_active = false;
+    }
+    if (response.data.data.is_trending) {
+      jobData.value.is_trending = true;
+    } else {
+      jobData.value.is_trending = false;
     }
   } catch (error) {
     console.error("Error Getting data:", error);
@@ -95,6 +102,7 @@ const onSubmit = async () => {
           title: jobData.value.title,
           description: jobData.value.description,
           is_active: jobData.value.is_active ? 1 : 0,
+          is_trending: jobData.value.is_trending ? 1 : 0,
           location: jobData.value.location,
           pay: jobData.value.pay,
           company_name: jobData.value.company_name,
@@ -124,12 +132,12 @@ const onSubmit = async () => {
       }
     });
   } catch (error: any) {
-        if (error.response) {
-            toast(`${error.response.data.message}`, {
-                type: "success",
-            });
-        }
+    if (error.response) {
+      toast(`${error.response.data.message}`, {
+        type: "success",
+      });
     }
+  }
 };
 
 // is user is admin then show the option of multiple companies else show only one
@@ -244,11 +252,17 @@ onMounted(() => {
                 <VSwitch v-model="jobData.is_active" label="Active" />
               </VCol>
 
+              <!-- 👉 is_trending -->
+              <VCol cols="12" v-if="props.existingJobId">
+                <VSwitch v-model="jobData.is_trending" label="Trending" />
+              </VCol>
+
               <!-- 👉 Submit and Cancel -->
               <VCol cols="12">
                 <VBtn type="submit" class="me-3">
                   {{ isEditing ? `Edit` : `Create` }}
                 </VBtn>
+
                 <VBtn
                   type="reset"
                   variant="tonal"
