@@ -1,9 +1,7 @@
 import { setupLayouts } from "virtual:generated-layouts";
 import { createRouter, createWebHistory } from "vue-router";
 import routes from "~pages";
-// import CryptoJS from "crypto-js";
 
-// const userRole = CryptoJS.AES.decrypt(localStorage.getItem('userRole'), "role").toString(CryptoJS.enc.Utf8)
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [...setupLayouts(routes)],

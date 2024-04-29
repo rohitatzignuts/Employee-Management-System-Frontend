@@ -28,6 +28,7 @@ const emit = defineEmits<Emit>();
 const logoFile = ref<string | null>("");
 const isEditing = ref<boolean>(false);
 const isFormValid = ref<boolean>(false);
+const isLoading = ref<boolean>(false);
 const refForm = ref<VForm>();
 const getCompanyId = ref<string | number | null>(props.companyId ?? null);
 const companyData = ref({
@@ -105,6 +106,7 @@ const onSubmit = async () => {
     // check form validation
     refForm.value?.validate().then(async (res) => {
       if (res.valid) {
+        isLoading.value = true
         // handle image/file submission
         const formData = new FormData();
         formData.append("logo", logoFile.value);
@@ -138,6 +140,7 @@ const onSubmit = async () => {
           });
           isEditing.value = false;
           closeNavigationDrawer();
+          isLoading.value = false
         } else {
           refForm.value?.reset();
           refForm.value?.resetValidation();
@@ -288,6 +291,14 @@ watchEffect(() => {
               <VCol cols="12">
                 <VBtn type="submit" class="me-3">
                   {{ isEditing ? `Edit` : `Create` }}
+                  <VProgressCircular
+                    v-if="isLoading"
+                    :size="15"
+                    width="3"
+                    color="#ffffff"
+                    class="ms-2"
+                    indeterminate
+                  />
                 </VBtn>
                 <VBtn
                   type="reset"
