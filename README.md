@@ -1,6 +1,30 @@
-# vue
+# EMS
 
-This template should help get you started developing with Vue 3 in Vite.
+This is the backend implementation for the Employee Management System project.
+
+### Prerequisites
+You need the backend running for this to work. Clone the backend from [this repository](https://github.com/rohitatzignuts/Employee-Management-System-Backend).
+
+### Setup Instructions
+1. Clone the backend repository.
+2. Install the necessary dependencies.
+3. Configure your environment variables.
+4. Run the backend server.
+
+### Backend Features
+- Manages employees, companies, jobs and roles.
+- Provides APIs for CRUD operations on employees, jobs, and job applicants.
+- Supports authentication and authorization for different user roles.
+- Uses Laravel as the backend framework.
+
+### Technologies Used
+- Laravel
+- MySQL
+- PHP
+- RESTful APIs
+
+### Note
+Ensure that the frontend is configured to communicate with the backend APIs for full functionality.
 
 ## Recommended IDE Setup
 
@@ -33,4 +57,4 @@ npm run dev
 ```sh
 npm run build
 ```
-# Employee-Management-System-Frontend-
+# Employee-Management-System-Frontend
