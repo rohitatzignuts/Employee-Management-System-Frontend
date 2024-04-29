@@ -1,6 +1,6 @@
 # EMS
 
-This is the backend implementation for the Employee Management System project.
+This is the frontend implementation for the Employee Management System project.
 
 ### Prerequisites
 You need the backend running for this to work. Clone the backend from [this repository](https://github.com/rohitatzignuts/Employee-Management-System-Backend).
