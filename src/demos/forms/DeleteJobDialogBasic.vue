@@ -3,27 +3,31 @@ import axios from "axios";
 import { ref } from "vue";
 import { useJobsStore } from "../../store/useJobsStore";
 import { useCompanyStore } from "@/store/useCompanyStore";
-import { toast } from "vue3-toastify";
 import type { VForm } from "vuetify/components/VForm";
+import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { requiredValidator } from "../../@core/utils/validators";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const props = defineProps<{
   isDialogVisible: boolean;
-  deleteId: number | undefined;
+  deleteId:  number | undefined | null;
 }>();
 
 const emit = defineEmits<{
   (event: "isDeleteDialogVisible", payload: boolean): void;
 }>();
 
-const isFormValid = ref<boolean>(false);
 const refForm = ref<VForm>();
+const isFormValid = ref<boolean>(false);
 const deleteTypeRef = ref<"permanent" | "temporary" | null>(null);
+
 const store = useJobsStore();
 const { getAllJobs, getJobsByCompany } = store;
 const cStore = useCompanyStore();
 const { getAllRegisteredCompanies } = cStore;
+const authStore = useAuthStore();
+const { userRole } = authStore;
 
 const handleConfirm = () => {
   // Emit the event to indicate delete confirmation with the selected deleteType
@@ -36,7 +40,7 @@ const handleCancel = () => {
 };
 
 // handle item delete
-const handleJobDelete = async (jobId: undefined | number) => {
+const handleJobDelete = async (jobId: undefined | number | null) => {
   const access_token = localStorage.getItem("access_token");
   try {
     refForm.value?.validate().then(async (res) => {
@@ -52,8 +56,11 @@ const handleJobDelete = async (jobId: undefined | number) => {
           });
           if (response) {
             // if delete is success full recall the companies list and show toast message
-            getAllJobs();
-            getJobsByCompany();
+            if (userRole === "admin") {
+              getAllJobs();
+            } else {
+              getJobsByCompany();
+            }
             getAllRegisteredCompanies();
             handleConfirm();
             toast(`${response.data.message}`, {

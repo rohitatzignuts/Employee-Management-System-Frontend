@@ -10,8 +10,8 @@ import { storeToRefs } from "pinia";
 
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false);
-const jobEditid = ref<number | any>();
-const jobDeleteid = ref<number | any>();
+const jobEditid = ref<number | undefined | null>();
+const jobDeleteid = ref<number | undefined | null>();
 const deleteJobDialog = ref<boolean>(false);
 const searchQuery = ref<string>("");
 const selectCompanies = ref<Array<string>>([]);
@@ -59,12 +59,13 @@ const handleJobDelete = (id: number) => {
 const dialogClose = (e: any) => {
     isAddNewUserDrawerVisible.value = false;
     jobEditid.value = null;
+    // only call the api if user has performed any actions
     if (e) {
         if (userRole === "admin") {
             getAllJobs();
         }
         getJobsByCompany();
-        
+
         getAllRegisteredCompanies();
     }
 };
@@ -112,12 +113,14 @@ onMounted(() => {
         <VDivider class="my-4" />
         <!-- 👉 Search and filter -->
         <VRow class="my-2">
+            <!-- 👉 Search bar for serching jobs by job title -->
             <VCol :cols="userRole === 'admin' ? 8 : 12">
                 <div class="invoice-list-search">
                     <AppTextField v-model="searchQuery" density="compact" prepend-inner-icon="tabler-search"
                         placeholder="Search By Job Title" @input="handleSearch" />
                 </div>
             </VCol>
+            <!-- 👉 select menu for filtering by compay name -->
             <VCol v-if="userRole === 'admin'" cols="4">
                 <div>
                     <AppSelect v-model="selectedCompany" :items="selectCompanies" clearable
@@ -141,6 +144,7 @@ onMounted(() => {
                         </td>
                     </tr>
                 </template>
+
                 <!-- 👉 template for job status  -->
                 <template #item.is_active="{ item }">
                     <div class="d-flex gap-1">
@@ -148,6 +152,7 @@ onMounted(() => {
                         <VChip color="success" v-else> active </VChip>
                     </div>
                 </template>
+
                 <!-- 👉 template for job actions edit/delete  -->
                 <template #item.actions="{ item }">
                     <div class="d-flex gap-1">

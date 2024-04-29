@@ -1,53 +1,64 @@
 import axios from "axios";
-// import CryptoJS from "crypto-js";
-// import router from '@/router'
-// import { toast } from 'vue3-toastify';
-// import 'vue3-toastify/dist/index.css';
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export const useApplicationStore = defineStore("applications", () => {
     const access_token = localStorage.getItem("access_token");
+    // array to store all applicants list
     const applicantsList = ref<Array<object>>();
+    // array to store all applicants list by the company
     const applicantsListByCompany = ref<Array<object>>();
-    const getAllApplicants = async (jobTitle?:string,status?:string) => {
+
+    // get the list of all the applicants
+    const getAllApplicants = async (jobTitle?: string, status?: string) => {
         try {
             const response = await axios.get("/applications", {
                 headers: {
                     Authorization: `Bearer ${access_token}`,
                 },
-                params : {
-                    jobTitle,status
-                }
+                params: {
+                    jobTitle,
+                    status,
+                },
             });
             applicantsList.value = response.data.data;
         } catch (error: any) {
             if (error.response) {
-                console.log(`${error.response.data.message}`);
+                toast("Error : Failed to get the applicants", {
+                    type: "error",
+                });
             }
         }
     };
 
-    const getAllApplicantsByCompany = async (id:number|undefined,status?:string) => {
+    // get the list of all the applicants by company
+    const getAllApplicantsByCompany = async (
+        id: number | undefined,
+        status?: string
+    ) => {
         try {
             const response = await axios.get(`${id}/applications`, {
                 headers: {
                     Authorization: `Bearer ${access_token}`,
                 },
-                params : {
-                    status
-                }
+                params: {
+                    status,
+                },
             });
             applicantsListByCompany.value = response.data.data;
         } catch (error: any) {
             if (error.response) {
-                console.log(`${error.response.data.message}`);
+                toast("Error : Failed to get the applicants", {
+                    type: "error",
+                });
             }
         }
     };
-    
+
     return {
-        applicantsList,
-        applicantsListByCompany,
         getAllApplicants,
         getAllApplicantsByCompany,
+        applicantsList,
+        applicantsListByCompany,
     };
 });

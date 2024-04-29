@@ -1,46 +1,56 @@
-import axios from 'axios'
+import axios from "axios";
 
-export const useCompanyStore = defineStore('companies', () => {
+export const useCompanyStore = defineStore("companies", () => {
+    const totalCompanies = ref<number>(0);
+    const isLoading = ref<boolean>(true);
+    const companies = ref<Array<Object>>([]);
+    const access_token = localStorage.getItem("access_token");
+    const registeredCompanies = ref<Array<string>>([]);
 
-    const totalCompanies = ref<number>(0)
-    const isLoading = ref<boolean>(true)
-    const companies = ref<Array<Object>>([])
-    const access_token = localStorage.getItem("access_token")
-    const registeredCompanies = ref<Array<string>>([])
-
-    const getAllCompanies = async (term: string | null = '',status: string | undefined = undefined) => {
+    // get all the companys from the database
+    const getAllCompanies = async (
+        term: string | null = "",
+        status: string | undefined = undefined
+    ) => {
         try {
             const response = await axios.get(`companies`, {
                 headers: {
                     Authorization: `Bearer ${access_token}`,
                 },
-                params : {
-                    term,status
-                }
-            })
+                params: {
+                    term,
+                    status,
+                },
+            });
             if (response.data) {
-                companies.value = response.data.data 
-                totalCompanies.value = response.data.data?.length ?? 0
+                companies.value = response.data.data;
+                totalCompanies.value = response.data.data?.length ?? 0;
             } else {
-                console.log('No Companies For Now....')
+                console.log("No Companies For Now....");
             }
         } catch (error: any) {
-            console.log('Error fetching companies:', error.message)
+            console.log("Error fetching companies:", error);
         } finally {
-            isLoading.value = false
+            isLoading.value = false;
         }
-    }
+    };
 
+    // get all the company names for filtering process
     const getAllRegisteredCompanies = async () => {
-        try{
-            const response = await axios.get('registeredCompanies')
+        try {
+            const response = await axios.get("registeredCompanies");
             registeredCompanies.value = Array.from(new Set(response.data.data));
-        }catch(error:any){
-            console.log(error)
+        } catch (error: any) {
+            console.log(error);
         }
-    }   
+    };
 
     return {
-        getAllCompanies, totalCompanies, isLoading, companies,getAllRegisteredCompanies,registeredCompanies
-    }
-})
+        getAllCompanies,
+        getAllRegisteredCompanies,
+        totalCompanies,
+        isLoading,
+        companies,
+        registeredCompanies,
+    };
+});

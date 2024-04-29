@@ -1,5 +1,7 @@
 import axios from "axios";
 import { useEmployeesStore } from "./useEmployeesStore";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export const useJobsStore = defineStore("jobs", () => {
     const eStore = useEmployeesStore();
@@ -8,8 +10,10 @@ export const useJobsStore = defineStore("jobs", () => {
     const totalJobsByCompanies = ref<Array<Object>>([]);
     const totalJobsCount = ref<number>(0);
     const totalJobsCountByCompany = ref<number>(0);
-    const allJobTitles = ref<Array<string>>([])
+    const allJobTitles = ref<Array<string>>([]);
+    const access_token = localStorage.getItem("access_token");
 
+    // get all the jobs from the database
     const getAllJobs = async (
         term: string | null = "",
         company: string | undefined = undefined
@@ -23,15 +27,19 @@ export const useJobsStore = defineStore("jobs", () => {
             });
             totaljobs.value = response.data.data ?? [];
             totalJobsCount.value = response.data.data?.length ?? 0;
-        } catch (error) {
-            console.error("Error fetching jobs", error);
+        } catch (error: any) {
+            if (error.response) {
+                toast("Error : Failed to get the jobs", {
+                    type: "error",
+                });
+            }
         } finally {
             isLoading.value = false;
         }
     };
 
+    // get all the jobs from the database by company
     const getJobsByCompany = async (term: string | null = "") => {
-        const access_token = localStorage.getItem("access_token");
         const company_id = eStore.storedCmpId;
         try {
             const response = await axios.get(
@@ -44,31 +52,36 @@ export const useJobsStore = defineStore("jobs", () => {
             );
             totalJobsByCompanies.value = response.data.data ?? [];
             totalJobsCountByCompany.value = response.data.data?.length ?? 0;
-        } catch (error) {
-            console.error("Error fetching jobs", error);
+        } catch (error: any) {
+            if (error.response) {
+                toast("Error : Failed to get the jobs", {
+                    type: "error",
+                });
+            }
         } finally {
             isLoading.value = false;
         }
     };
 
-    const getAllJobTitles = async () => { 
+    // get all the job titles for filtering process
+    const getAllJobTitles = async () => {
         try {
-            const response = await axios.get('/jobs')
-            allJobTitles.value = response.data.data.map((job:object) => {
-                return job.title
-            })
+            const response = await axios.get("/jobs");
+            allJobTitles.value = response.data.data.map((job: object) => {
+                return job.title;
+            });
         } catch (error) {
             console.log(error);
         }
     };
-    
+
     return {
         getAllJobs,
+        getJobsByCompany,
+        getAllJobTitles,
         totalJobsCount,
         allJobTitles,
         totaljobs,
-        getJobsByCompany,
-        getAllJobTitles,
         totalJobsCountByCompany,
         totalJobsByCompanies,
         isLoading,

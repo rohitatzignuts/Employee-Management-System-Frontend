@@ -12,8 +12,8 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
 interface Props {
-  isDrawerOpen: boolean;
-  companyId?: string | number;
+  isDrawerOpen: boolean,
+  companyId?: number | undefined | null,
 }
 
 interface Emit {

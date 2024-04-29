@@ -6,10 +6,11 @@ import AddNewEmployeeDrawer from "@/demos/forms/AddNewEmployeeDrawer.vue";
 import DeleteEmployeeDialogBasic from "@/demos/forms/DeleteEmployeeDialogBasic.vue";
 import { useAuthStore } from "@/store/useAuthStore";
 import { storeToRefs } from "pinia";
+
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false);
-const employeeEditid = ref<number | any>();
-const employeeDeleteid = ref<number | any>();
+const employeeEditid = ref<number | undefined | null>(undefined);
+const employeeDeleteid = ref<number | undefined | null>(undefined);
 const deleteCompanyDialog = ref<boolean>(false);
 const searchQuery = ref<string>("");
 const selectedRole = ref<string>();
@@ -36,10 +37,12 @@ const headers = [
 const dialogClose = (e: any) => {
   isAddNewUserDrawerVisible.value = false;
   employeeEditid.value = null;
+  // only call the api if user has performed any actions
   if (e) {
-    getCompanyEmployees();
     if (userRole === "admin") {
       getAllEmployees();
+    }else{
+      getCompanyEmployees();
     }
   }
 };
@@ -98,6 +101,7 @@ onMounted(() => {
 
     <!-- 👉 Search and filter -->
     <VRow class="my-2">
+      <!-- 👉 search bar to search employee by his/her name -->
       <VCol :cols="userRole === 'admin' ? 8 : 12">
         <div class="invoice-list-search">
           <AppTextField
@@ -109,6 +113,7 @@ onMounted(() => {
           />
         </div>
       </VCol>
+      <!-- 👉 select menu to select employees role -->
       <VCol cols="4" v-if="userRole === 'admin'">
         <AppSelect
           v-model="selectedRole"

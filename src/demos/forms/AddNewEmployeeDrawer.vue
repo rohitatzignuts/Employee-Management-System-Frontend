@@ -20,8 +20,8 @@ interface Emit {
 }
 
 interface Props {
-  isDrawerOpen: boolean;
-  employeeId?: string | number;
+  isDrawerOpen: boolean,
+  employeeId?: number | undefined | null,
 }
 
 const props = defineProps<Props>();
@@ -59,7 +59,7 @@ const closeNavigationDrawer = () => {
 };
 
 // 👉 get the company data on the basis of ID
-const getEmployeeData = async (empId: string | number) => {
+const getEmployeeData = async (empId: undefined | null | number) => {
   try {
     const access_token = localStorage.getItem("access_token");
     const response = await axios.get(`employee/${empId}`, {

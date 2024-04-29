@@ -16,6 +16,9 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
 const refVForm = ref<VForm>();
+const isoldPasswordVisible = ref(false);
+const isnewPasswordVisible = ref(false);
+
 const store = useAuthStore();
 const { username, handleLogout } = store;
 const loginData = ref({
@@ -33,9 +36,7 @@ const authThemeImg = useGenerateImageVariant(
 );
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark);
 
-const isoldPasswordVisible = ref(false);
-const isnewPasswordVisible = ref(false);
-
+// reser user password
 const handlePasswordReset = async () => {
   refVForm.value?.validate().then(async (res) => {
     if (res.valid) {
@@ -47,6 +48,7 @@ const handlePasswordReset = async () => {
           },
         });
         if (response) {
+          // log out user in password is successfully changed
           handleLogout();
           router.push("/login");
           loginData.value.email = "";

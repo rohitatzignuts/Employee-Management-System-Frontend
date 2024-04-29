@@ -6,10 +6,12 @@ import { toast } from "vue3-toastify";
 import type { VForm } from "vuetify/components/VForm";
 import "vue3-toastify/dist/index.css";
 import { requiredValidator } from "../../@core/utils/validators";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useEmployeesStore } from "@/store/useEmployeesStore";
 
 const props = defineProps<{
   isDialogVisible: boolean;
-  deleteId: number | undefined;
+  deleteId: number | undefined | null;
 }>();
 
 const emit = defineEmits<{
@@ -19,8 +21,13 @@ const emit = defineEmits<{
 const isFormValid = ref<boolean>(false);
 const refForm = ref<VForm>();
 const deleteTypeRef = ref<"permanent" | "temporary" | null>(null);
+
 const appStore = useApplicationStore();
-const { getAllApplicants } = appStore;
+const { getAllApplicants, getAllApplicantsByCompany } = appStore;
+const authStore = useAuthStore();
+const { userRole } = authStore;
+const empStore = useEmployeesStore();
+const { storedCmpId } = empStore;
 
 const handleConfirm = () => {
   // Emit the event to indicate delete confirmation with the selected deleteType
@@ -33,7 +40,7 @@ const handleCancel = () => {
 };
 
 // handle item delete
-const handleJobDelete = async (applicationId: undefined | number) => {
+const handleJobDelete = async (applicationId: undefined | number | null) => {
   const access_token = localStorage.getItem("access_token");
   try {
     refForm.value?.validate().then(async (res) => {
@@ -49,7 +56,11 @@ const handleJobDelete = async (applicationId: undefined | number) => {
           });
           if (response) {
             // if delete is success full recall the companies list and show toast message
-            getAllApplicants();
+            if (userRole === "admin") {
+              getAllApplicants();
+            } else {
+              getAllApplicantsByCompany(storedCmpId);
+            }
             handleConfirm();
             toast(`${response.data.message}`, {
               type: "success",

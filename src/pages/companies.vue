@@ -15,16 +15,14 @@ import { storeToRefs } from "pinia";
 
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false);
-const companyEditId = ref<number | any>();
+const companyEditId = ref<number | undefined | null>();
 const deleteCompanyDialog = ref<boolean>(false);
 const searchQuery = ref<string>("");
 const selectedStatus = ref<string | any>();
 
 // constants
-const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark);
 const store = useCompanyStore();
-const { totalCompanies, isLoading, companies, registeredCompanies } =
-  storeToRefs(store);
+const { companies } = storeToRefs(store);
 const { getAllCompanies } = store;
 const aStore = useAuthStore();
 const { userRole } = aStore;
@@ -59,6 +57,7 @@ const handleCompanyDelete = (companyId: number) => {
 const dialogClose = (e: any) => {
   isAddNewUserDrawerVisible.value = false;
   companyEditId.value = null;
+  // only call the api if user has performed any tasks
   if (e) {
     getAllCompanies();
   }
@@ -98,6 +97,7 @@ onMounted(() => {
 
       <!-- 👉 Search and filter -->
       <VRow class="my-2">
+        <!-- 👉 searchbar for company name -->
         <VCol cols="8">
           <div class="invoice-list-search">
             <AppTextField
@@ -109,6 +109,7 @@ onMounted(() => {
             />
           </div>
         </VCol>
+        <!-- 👉 select menu for company status -->
         <VCol cols="4">
           <AppSelect
             v-model="selectedStatus"

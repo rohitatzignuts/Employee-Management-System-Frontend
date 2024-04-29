@@ -9,7 +9,7 @@ import { requiredValidator } from "../../@core/utils/validators";
 
 const props = defineProps<{
   isDialogVisible: boolean;
-  deleteId: number | undefined;
+  deleteId: number | undefined | null;
 }>();
 
 const emit = defineEmits<{
@@ -32,7 +32,7 @@ const handleCancel = () => {
 };
 
 // handle item delete
-const handleCompanyDelete = async (companyId: number | undefined) => {
+const handleCompanyDelete = async (companyId: number | undefined | null) => {
   const access_token = localStorage.getItem("access_token");
   try {
     refForm.value?.validate().then(async (res) => {

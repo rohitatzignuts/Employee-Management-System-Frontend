@@ -5,7 +5,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useEmployeesStore } from "@/store/useEmployeesStore";
 import { useJobsStore } from "@/store/useJobsStore";
 import { storeToRefs } from "pinia";
-// constants
+
 const store = useCompanyStore();
 const { getAllCompanies } = store;
 const { totalCompanies } = storeToRefs(store);
@@ -49,7 +49,7 @@ onMounted(() => {
               <div>
                 <VIcon icon="mdi-office-building" /><span class="text-h1">{{
                   totalCompanies
-                  }}</span>
+                }}</span>
               </div>
             </VCardTitle>
             <VCardItem> Companies Registered </VCardItem>
@@ -63,7 +63,7 @@ onMounted(() => {
             <div>
               <VIcon icon="mdi-office-building" /><span class="text-h1">{{
                 cmpEmployeeCount
-                }}</span>
+              }}</span>
             </div>
           </VCardTitle>
           <VCardItem> Employees are regitered.. </VCardItem>
@@ -79,20 +79,20 @@ onMounted(() => {
             <div>
               <VIcon icon="mdi-file-account" /><span class="text-h1">{{
                 totalJobsCount
-                }}</span>
+              }}</span>
             </div>
           </VCardTitle>
           <VCardItem> Jobs Listed </VCardItem>
         </VCard>
 
-        <!-- for cmp_admin typeof user  --> 
+        <!-- for cmp_admin typeof user  -->
         <VCard v-if="userRole === 'cmp_admin'" variant="tonal">
           <VCardTitle>
             <!-- total job count of the logged in company  -->
             <div>
               <VIcon icon="mdi-file-account" /><span class="text-h1">{{
                 totalJobsCountByCompany
-                }}</span>
+              }}</span>
             </div>
           </VCardTitle>
           <VCardItem> Jobs Listed </VCardItem>

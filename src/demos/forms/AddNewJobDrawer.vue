@@ -20,8 +20,8 @@ interface Emit {
 }
 
 interface Props {
-  isDrawerOpen: boolean;
-  existingJobId?: string | number;
+  isDrawerOpen: boolean,
+  existingJobId?: number | undefined | null,
 }
 
 const props = defineProps<Props>();

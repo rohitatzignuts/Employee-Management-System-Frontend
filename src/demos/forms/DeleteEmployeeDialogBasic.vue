@@ -10,16 +10,16 @@ import { requiredValidator } from "../../@core/utils/validators";
 
 const props = defineProps<{
   isDialogVisible: boolean;
-  employeeId: number | undefined;
+  employeeId: number | undefined | null;
 }>();
 
 const emit = defineEmits<{
   (event: "isDeleteDialogVisible", payload: boolean): void;
 }>();
 
-const deleteTypeRef = ref<"permanent" | "temporary" | null>(null);
-const isFormValid = ref<boolean>(false);
 const refForm = ref<VForm>();
+const deleteTypeRef = ref<"permanent" | "temporary" | null>(null);
+
 const store = useEmployeesStore();
 const aStore = useAuthStore();
 
@@ -34,7 +34,7 @@ const handleCancel = () => {
 };
 
 // handle item delete
-const handleEmployeeDelete = async (employeeId: undefined | number) => {
+const handleEmployeeDelete = async (employeeId: undefined | number | null) => {
   const access_token = localStorage.getItem("access_token");
   try {
     refForm.value?.validate().then(async (res) => {

@@ -15,6 +15,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
 const refVForm = ref<VForm>();
+const isPasswordVisible = ref<boolean>(false);
 const loginData = ref({
   email: "",
   password: "",
@@ -29,8 +30,7 @@ const authThemeImg = useGenerateImageVariant(
 );
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark);
 
-const isPasswordVisible = ref(false);
-
+// handle user login 
 const handleLogin = async () => {
   refVForm.value?.validate().then(async (res) => {
     if (res.valid) {

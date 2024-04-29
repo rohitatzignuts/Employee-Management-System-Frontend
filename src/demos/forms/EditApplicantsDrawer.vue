@@ -11,39 +11,46 @@ interface Emit {
 
 interface Props {
     isDrawerOpen: boolean;
-    applicationEditId: number | undefined
-
+    applicationEditId :{
+        type: number | undefined | null,
+        default : null
+    } 
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emit>();
-const access_token = localStorage.getItem("access_token");
-const applicantStatusOptions = [
-    'Accepted', 'Rejected', 'Pending'
-]
+
 const applicationData = ref({
     id: null,
-    job_title: '',
-    company_name: '',
-    status: ''
-})
+    job_title: "",
+    company_name: "",
+    status: "",
+});
 
+const access_token = localStorage.getItem("access_token");
+const applicantStatusOptions = ["Accepted", "Rejected", "Pending"];
+
+// get applicant's data
 const getApplicantsData = async (applicationId: number | undefined) => {
     try {
         const response = await axios.get(`/application/${applicationId}`, {
             headers: {
                 Authorization: `Bearer ${access_token}`,
-            }
-        })
-        applicationData.value = response.data.data
-    } catch (error) {
-        console.log(error);
+            },
+        });
+        applicationData.value = response.data.data;
+    } catch (error: any) {
+        if (error.response) {
+            toast("Error : Failed to get the Data 😓", {
+                type: "error",
+            });
+        }
     }
-}
+};
 
 const handleApplicationEdit = async () => {
     try {
-        const status = applicationData.value.status
+        const status = applicationData.value.status;
         const response = await axios.post(
             `/application/edit-${props.applicationEditId}`,
             { status },
@@ -52,39 +59,33 @@ const handleApplicationEdit = async () => {
                     Authorization: `Bearer ${access_token}`,
                 },
             }
-        )
+        );
         if (response) {
             toast(`${response.data.message}`, {
                 type: "success",
             });
-            emit('closeDialog',true)
-            emit('isApplicationEdited',true)
+            emit("closeDialog", true);
+            emit("isApplicationEdited", true);
         }
     } catch (error: any) {
         if (error.response) {
-            toast(`${error.response.data.message}`, {
+            toast(`${error.response.data.message} 🙌`, {
                 type: "success",
             });
         }
     }
-}
+};
 
 const closeNavigationDrawer = () => {
     emit("closeDialog", false);
-    //   isEditing.value = false;
-
-    //   nextTick(() => {
-    //     refForm.value?.reset();
-    //     empData.value.joining_date = null;
-    //     refForm.value?.resetValidation();
-    //   });
 };
 
 watchEffect(() => {
+    // get new application data when applicationEditId changes
     if (props.applicationEditId) {
-        getApplicantsData(props.applicationEditId)
+        getApplicantsData(props.applicationEditId);
     }
-})
+});
 </script>
 
 <template>
@@ -97,15 +98,19 @@ watchEffect(() => {
                     <VCardText>
                         <VForm @submit.prevent="handleApplicationEdit">
                             <VRow>
+                                <!-- 👉 Applicant's ID -->
                                 <VCol cols="12">
-                                    <AppTextField v-model="applicationData.id" label="Applicant ID" disabled />
+                                    <AppTextField v-model="applicationData.id" disabled label="Applicant ID" />
                                 </VCol>
+                                <!-- 👉 Company applied in -->
                                 <VCol cols="12">
-                                    <AppTextField v-model="applicationData.company_name" label="Applied In" disabled />
+                                    <AppTextField v-model="applicationData.company_name" disabled label="Applied In" />
                                 </VCol>
+                                <!-- 👉 Position applied for -->
                                 <VCol cols="12">
-                                    <AppTextField v-model="applicationData.job_title" label="Applied For" disabled />
+                                    <AppTextField v-model="applicationData.job_title" disabled label="Applied For" />
                                 </VCol>
+                                <!-- 👉 application status -->
                                 <VCol cols="12">
                                     <AppSelect v-model="applicationData.status" :items="applicantStatusOptions"
                                         label="Applicant Status" placeholder="Change Status" />
@@ -123,8 +128,5 @@ watchEffect(() => {
                 </VCard>
             </PerfectScrollbar>
         </VNavigationDrawer>
-
     </div>
 </template>
-
-<style lang="scss" scoped></style>
