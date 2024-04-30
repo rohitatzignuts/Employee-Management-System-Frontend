@@ -240,7 +240,7 @@ onMounted(() => {
                   v-model="jobData.company_name"
                   :items="resisteredCompanies"
                   :rules="[requiredValidator]"
-                  :disabled="props.existingJobId"
+                  :disabled="!!props.existingJobId"
                   required
                   label="Companies"
                   placeholder="Select Company"

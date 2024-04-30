@@ -101,3 +101,9 @@ onMounted(() => {
     </VRow>
   </div>
 </template>
+
+<style scoped>
+a{
+  color: unset;
+}
+</style>

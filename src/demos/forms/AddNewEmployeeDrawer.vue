@@ -223,7 +223,7 @@ onMounted(() => {
                   label="Companies"
                   v-model="empData.company_name"
                   :items="resisteredCompanies"
-                  :disabled="props.employeeId"
+                  :disabled="!!props.employeeId"
                   :rules="[requiredValidator]"
                   placeholder="Select Company"
                 />

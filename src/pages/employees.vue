@@ -9,8 +9,8 @@ import { storeToRefs } from "pinia";
 
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false);
-const employeeEditid = ref<number | undefined | null>(undefined);
-const employeeDeleteid = ref<number | undefined | null>(undefined);
+const employeeEditid = ref<number | undefined | null>(null);
+const employeeDeleteid = ref<number | undefined | null>(null);
 const deleteCompanyDialog = ref<boolean>(false);
 const searchQuery = ref<string>("");
 const selectedRole = ref<string>();

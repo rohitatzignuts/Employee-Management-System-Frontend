@@ -11,10 +11,7 @@ interface Emit {
 
 interface Props {
     isDrawerOpen: boolean;
-    applicationEditId :{
-        type: number | undefined | null,
-        default : null
-    } 
+    applicationEditId : number | undefined | null
 }
 
 const props = defineProps<Props>();

@@ -10,8 +10,8 @@ import { storeToRefs } from "pinia";
 
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false);
-const jobEditid = ref<number | undefined | null>();
-const jobDeleteid = ref<number | undefined | null>();
+const jobEditid = ref<number | undefined | null>(null);
+const jobDeleteid = ref<number | undefined | null>(null);
 const deleteJobDialog = ref<boolean>(false);
 const searchQuery = ref<string>("");
 const selectCompanies = ref<Array<string>>([]);
@@ -143,6 +143,13 @@ onMounted(() => {
                             <p class="my-1">Pay: ${{ slotProps.item.raw.pay }}</p>
                         </td>
                     </tr>
+                </template>
+
+                <!-- 👉 template for job status  -->
+                <template #item.title="{ item }">
+                    <div class="d-flex gap-1">
+                        {{ item.raw.title }}<sub v-if="item.raw.is_trending" class="font-italic">trending*</sub>
+                    </div>
                 </template>
 
                 <!-- 👉 template for job status  -->

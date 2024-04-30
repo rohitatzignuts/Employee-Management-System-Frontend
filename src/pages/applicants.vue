@@ -12,8 +12,8 @@ import { ref } from "vue";
 
 const editApplicantDrawer = ref<boolean>(false);
 const deleteApplicantDialog = ref<boolean>(false);
-const applicationEditId = ref<number | undefined | null>()
-const applicationDeleteId = ref<number | undefined | null>()
+const applicationEditId = ref<number | undefined | null>(null)
+const applicationDeleteId = ref<number | undefined | null>(null)
 const selectedJobTitle = ref<string>('')
 const selectedApplicationStatus = ref<string>('')
 
@@ -41,7 +41,7 @@ const statusChipColor = (value: string) => value === 'Accepted' ? 'success' : va
 
 const dialogClose = (e: any) => {
     editApplicantDrawer.value = false
-    applicationEditId.value = undefined
+    applicationEditId.value = null
     // call the api only if user has performed any tasks
     if (e) {
         if (userRole === 'admin') {

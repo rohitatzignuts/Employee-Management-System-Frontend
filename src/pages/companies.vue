@@ -8,14 +8,11 @@ import { useCompanyStore } from "../store/useCompanyStore";
 import misc404 from "@images/pages/404.png";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useDebounceFn } from "@vueuse/core";
-import { useGenerateImageVariant } from "@core/composable/useGenerateImageVariant";
-import miscMaskDark from "@images/pages/misc-mask-dsark.png";
-import miscMaskLight from "@images/pages/misc-mask-light.png";
 import { storeToRefs } from "pinia";
 
 // ref variables
 const isAddNewUserDrawerVisible = ref<boolean>(false);
-const companyEditId = ref<number | undefined | null>();
+const companyEditId = ref<number | undefined | null>(null);
 const deleteCompanyDialog = ref<boolean>(false);
 const searchQuery = ref<string>("");
 const selectedStatus = ref<string | any>();
