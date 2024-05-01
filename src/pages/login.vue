@@ -30,7 +30,7 @@ const authThemeImg = useGenerateImageVariant(
 );
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark);
 
-// handle user login 
+// handle user login
 const handleLogin = async () => {
   refVForm.value?.validate().then(async (res) => {
     if (res.valid) {

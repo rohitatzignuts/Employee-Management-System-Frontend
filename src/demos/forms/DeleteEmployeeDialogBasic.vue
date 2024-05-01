@@ -18,6 +18,7 @@ const emit = defineEmits<{
 }>();
 
 const refForm = ref<VForm>();
+const isFormValid = ref<boolean>(false);
 const deleteTypeRef = ref<"permanent" | "temporary" | null>(null);
 
 const store = useEmployeesStore();
@@ -55,7 +56,7 @@ const handleEmployeeDelete = async (employeeId: undefined | number | null) => {
             } else {
               store.getCompanyEmployees();
             }
-            handleConfirm()
+            handleConfirm();
             toast(`${response.data.message}`, {
               type: "success",
             });
@@ -67,7 +68,7 @@ const handleEmployeeDelete = async (employeeId: undefined | number | null) => {
     });
   } catch (error: any) {
     toast(`Error Deleting : ${error}`, {
-      type: "success",
+      type: "error",
     });
   }
 };
@@ -81,7 +82,11 @@ const handleEmployeeDelete = async (employeeId: undefined | number | null) => {
     <!-- Dialog Content -->
     <VCard title="How do you want to delete this record ?">
       <!-- Delete confirmation form  -->
-      <VForm @submit.prevent="handleEmployeeDelete(props.employeeId)">
+      <VForm
+        v-model="isFormValid"
+        ref="refForm"
+        @submit.prevent="handleEmployeeDelete(props.employeeId)"
+      >
         <VCardText class="demo-space-x">
           <!-- permanent checkbox  -->
           <VCheckbox

@@ -103,7 +103,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-a{
+a {
   color: unset;
 }
 </style>
