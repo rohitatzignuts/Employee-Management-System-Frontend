@@ -38,7 +38,7 @@ const handleCompanyDelete = async (companyId: number | undefined | null) => {
 		refForm.value?.validate().then(async (res) => {
 			if (res.valid) {
 				if (access_token) {
-					const response = await axios.delete(`company/${companyId}`, {
+					const response = await axios.delete(`companies/${companyId}`, {
 						headers: {
 							Authorization: `Bearer ${access_token}`
 						},

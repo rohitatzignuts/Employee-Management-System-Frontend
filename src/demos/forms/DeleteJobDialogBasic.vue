@@ -46,7 +46,7 @@ const handleJobDelete = async (jobId: undefined | number | null) => {
 		refForm.value?.validate().then(async (res) => {
 			if (res.valid) {
 				if (access_token) {
-					const response = await axios.delete(`job/${jobId}`, {
+					const response = await axios.delete(`companies/jobs/${jobId}`, {
 						headers: {
 							Authorization: `Bearer ${access_token}`
 						},

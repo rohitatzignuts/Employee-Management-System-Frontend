@@ -38,17 +38,17 @@ const handleLogin = async () => {
 				const response = await axios.post('login', loginData.value)
 				if (response) {
 					localStorage.setItem('username', loginData.value.email)
-					localStorage.setItem('access_token', response.data.access_token)
+					localStorage.setItem('access_token', response.data.data.access_token)
 					localStorage.setItem(
 						'userRole',
-						CryptoJS.AES.encrypt(response.data.role, 'role').toString()
+						CryptoJS.AES.encrypt(response.data.data.role, 'role').toString()
 					)
 					localStorage.setItem(
 						'company',
 						CryptoJS.AES.encrypt(
 							JSON.stringify({
-								id: response.data.company_id,
-								name: response.data.company_name
+								id: response.data.data.company_id,
+								name: response.data.data.company_name
 							}),
 							'company'
 						).toString()

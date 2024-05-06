@@ -26,14 +26,14 @@ const aStore = useAuthStore()
 const { userRole } = aStore
 
 const cStore = useCompanyStore()
-const { registeredCompanies, companies } = storeToRefs(cStore)
+const { uniqueJobCompanies } = storeToRefs(cStore)
 const { getAllRegisteredCompanies } = cStore
 
 const headers = [
 	{ title: '', key: 'data-table-expand' },
 	{ title: 'title', key: 'title' },
 	{ title: 'status', key: 'is_active' },
-	{ title: 'By', key: 'company_name' },
+	{ title: 'By', key: 'company.name' },
 	{ title: 'location', key: 'location' },
 	{ title: 'Actions', key: 'actions' }
 ]
@@ -81,8 +81,8 @@ const handleSearch = useDebounceFn(() => {
 
 // assign value to the selectCompanies
 watchEffect(() => {
-	if (Array.isArray(registeredCompanies.value)) {
-		selectCompanies.value = [...registeredCompanies.value]
+	if (Array.isArray(uniqueJobCompanies.value)) {
+		selectCompanies.value = [...uniqueJobCompanies.value]
 	}
 })
 
@@ -120,7 +120,7 @@ onMounted(() => {
 						v-model="searchQuery"
 						density="compact"
 						prepend-inner-icon="tabler-search"
-						placeholder="Search By Job Title"
+						placeholder="Search By Job Title (min 3 chars)"
 						@input="handleSearch"
 					/>
 				</div>

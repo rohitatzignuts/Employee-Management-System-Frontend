@@ -30,12 +30,18 @@ const applicantStatusOptions = ['Accepted', 'Rejected', 'Pending']
 // get applicant's data
 const getApplicantsData = async (applicationId: number | undefined) => {
 	try {
-		const response = await axios.get(`/application/${applicationId}`, {
-			headers: {
-				Authorization: `Bearer ${access_token}`
+		const response = await axios.get(
+			`companies/applications/${applicationId}`,
+			{
+				headers: {
+					Authorization: `Bearer ${access_token}`
+				}
 			}
-		})
-		applicationData.value = response.data.data
+		)
+		applicationData.value.id = response.data.data.id
+		applicationData.value.company_name = response.data.data.company.name
+		applicationData.value.job_title = response.data.data.job.title
+		applicationData.value.status = response.data.data.status
 	} catch (error: any) {
 		if (error.response) {
 			toast('Error : Failed to get the Data 😓', {
@@ -49,7 +55,7 @@ const handleApplicationEdit = async () => {
 	try {
 		const status = applicationData.value.status
 		const response = await axios.post(
-			`/application/edit-${props.applicationEditId}`,
+			`companies/applications/update/${props.applicationEditId}`,
 			{ status },
 			{
 				headers: {
@@ -67,7 +73,7 @@ const handleApplicationEdit = async () => {
 	} catch (error: any) {
 		if (error.response) {
 			toast(`${error.response.data.message} 🙌`, {
-				type: 'success'
+				type: 'error'
 			})
 		}
 	}

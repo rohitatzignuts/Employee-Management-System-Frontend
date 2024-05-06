@@ -17,19 +17,15 @@ export const useEmployeesStore = defineStore('employees', () => {
 	const cmpEmployeeCount = ref<number>()
 
 	// get all the employees ( super admin )
-	const getAllEmployees = async (
-		term: string | null = '',
-		status: string | undefined = undefined
-	) => {
+	const getAllEmployees = async (company: string | null = '') => {
 		const access_token = localStorage.getItem('access_token')
 		try {
-			const response = await axios.get(`employees`, {
+			const response = await axios.get(`companies/employees/all`, {
 				headers: {
 					Authorization: `Bearer ${access_token}`
 				},
 				params: {
-					term,
-					status
+					company
 				}
 			})
 			employees.value = response.data.data ?? []
@@ -43,19 +39,15 @@ export const useEmployeesStore = defineStore('employees', () => {
 	}
 
 	// get the employees of the logged in company admin
-	const getCompanyEmployees = async (
-		term: string | null = '',
-		status: string | undefined = undefined
-	) => {
+	const getCompanyEmployees = async (term: string | null = '') => {
 		const access_token = localStorage.getItem('access_token')
 		try {
-			const response = await axios.get(`${storedCmpId}/employees`, {
+			const response = await axios.get(`companies/${storedCmpId}/employees`, {
 				headers: {
 					Authorization: `Bearer ${access_token}`
 				},
 				params: {
-					term,
-					status
+					term
 				}
 			})
 			cmpEmployees.value = response.data.data ?? []

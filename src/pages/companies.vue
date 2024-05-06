@@ -101,7 +101,7 @@ onMounted(() => {
 							v-model="searchQuery"
 							density="compact"
 							prepend-inner-icon="tabler-search"
-							placeholder="Search By Name"
+							placeholder="Search By Name (min 3 chars) "
 							@input="handleSearch"
 						/>
 					</div>

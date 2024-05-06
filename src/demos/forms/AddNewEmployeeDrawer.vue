@@ -59,7 +59,7 @@ const closeNavigationDrawer = () => {
 const getEmployeeData = async (empId: undefined | null | number) => {
 	try {
 		const access_token = localStorage.getItem('access_token')
-		const response = await axios.get(`employee/${empId}`, {
+		const response = await axios.get(`companies/employees/${empId}`, {
 			headers: {
 				Authorization: `Bearer ${access_token}`
 			}
@@ -68,7 +68,7 @@ const getEmployeeData = async (empId: undefined | null | number) => {
 		empData.value.last_name = response.data.data.last_name
 		empData.value.email = response.data.data.email
 		empData.value.joining_date = response.data.data.joining_date
-		empData.value.company_name = response.data.data.company_name
+		empData.value.company_name = response.data.data.company.name
 		getEmployeeId.value = null
 	} catch (error) {
 		console.error('Error Getting data:', error)
@@ -91,8 +91,8 @@ const onSubmit = async () => {
 				isEditing.value = !!props.employeeId
 				//dynamiclly change main URL on the basis of 'props.employeeId'
 				const url = props.employeeId
-					? `employee/update/${props.employeeId}`
-					: `employee/create`
+					? `companies/employees/update/${props.employeeId}`
+					: `companies/employees/create`
 				const response = await axios.post(url, input, {
 					headers: {
 						Authorization: `Bearer ${localStorage.getItem('access_token')}`

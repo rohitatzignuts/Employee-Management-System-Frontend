@@ -66,7 +66,7 @@ const closeNavigationDrawer = () => {
 const getCompanyData = async (comId: string | number) => {
 	try {
 		const access_token = localStorage.getItem('access_token')
-		const response = await axios.get(`company/${comId}}`, {
+		const response = await axios.get(`companies/${comId}}`, {
 			headers: {
 				Authorization: `Bearer ${access_token}`,
 				'content-type': 'multipart/form-data'
@@ -122,8 +122,8 @@ const onSubmit = async () => {
 				isEditing.value = props.companyId ? true : false
 				//dynamiclly change main URL on the basis of 'props.companyId'
 				const url = props.companyId
-					? `company/update/${props.companyId}`
-					: `company/create`
+					? `companies/update/${props.companyId}`
+					: `companies/create`
 				const response = await axios.post(url, input, {
 					headers: {
 						Authorization: `Bearer ${localStorage.getItem('access_token')}`,

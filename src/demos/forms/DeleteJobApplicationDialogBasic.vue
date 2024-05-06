@@ -46,14 +46,17 @@ const handleJobDelete = async (applicationId: undefined | number | null) => {
 		refForm.value?.validate().then(async (res) => {
 			if (res.valid) {
 				if (access_token) {
-					const response = await axios.delete(`application/${applicationId}`, {
-						headers: {
-							Authorization: `Bearer ${access_token}`
-						},
-						params: {
-							deleteType: deleteTypeRef.value
+					const response = await axios.delete(
+						`companies/applications/${applicationId}`,
+						{
+							headers: {
+								Authorization: `Bearer ${access_token}`
+							},
+							params: {
+								deleteType: deleteTypeRef.value
+							}
 						}
-					})
+					)
 					if (response) {
 						// if delete is success full recall the companies list and show toast message
 						if (userRole === 'admin') {

@@ -12,7 +12,7 @@ export const useApplicationStore = defineStore('applications', () => {
 	// get the list of all the applicants
 	const getAllApplicants = async (jobTitle?: string, status?: string) => {
 		try {
-			const response = await axios.get('/applications', {
+			const response = await axios.get('companies/applications/all', {
 				headers: {
 					Authorization: `Bearer ${access_token}`
 				},
@@ -37,7 +37,7 @@ export const useApplicationStore = defineStore('applications', () => {
 		status?: string
 	) => {
 		try {
-			const response = await axios.get(`${id}/applications`, {
+			const response = await axios.get(`companies/${id}/applications`, {
 				headers: {
 					Authorization: `Bearer ${access_token}`
 				},

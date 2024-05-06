@@ -19,8 +19,8 @@ const selectedApplicationStatus = ref<string>('')
 
 const headers = [
 	{ title: 'Applicant Id', key: 'user_id' },
-	{ title: 'Job Title', key: 'job_title' },
-	{ title: 'company', key: 'company_name' },
+	{ title: 'Job Title', key: 'job.title' },
+	{ title: 'company', key: 'company.name' },
 	{ title: 'status', key: 'status' },
 	{ title: 'resume', key: 'resume' },
 	{ title: 'Actions', key: 'actions' }

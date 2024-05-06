@@ -62,7 +62,7 @@ const closeNavigationDrawer = () => {
 const getJobData = async (jobId: string | number) => {
 	try {
 		const access_token = localStorage.getItem('access_token')
-		const response = await axios.get(`job/${jobId}`, {
+		const response = await axios.get(`jobs/${jobId}`, {
 			headers: {
 				Authorization: `Bearer ${access_token}`
 			}
@@ -71,7 +71,7 @@ const getJobData = async (jobId: string | number) => {
 		jobData.value.description = response.data.data.description
 		jobData.value.location = response.data.data.location
 		jobData.value.pay = response.data.data.pay
-		jobData.value.company_name = response.data.data.company_name
+		jobData.value.company_name = response.data.data.company.name
 		jobData.value.is_trending = response.data.data.is_trending
 		getEmployeeId.value = null
 		if (response.data.data.is_active) {
@@ -107,8 +107,8 @@ const onSubmit = async () => {
 				isEditing.value = props.existingJobId ? true : false
 				//dynamiclly change main URL on the basis of 'props.employeeId'
 				const url = props.existingJobId
-					? `job/update/${props.existingJobId}`
-					: `job/create`
+					? `companies/jobs/update/${props.existingJobId}`
+					: `companies/jobs/create`
 				const response = await axios.post(url, input, {
 					headers: {
 						Authorization: `Bearer ${localStorage.getItem('access_token')}`

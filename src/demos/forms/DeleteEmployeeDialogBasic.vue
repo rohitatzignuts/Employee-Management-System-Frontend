@@ -41,14 +41,17 @@ const handleEmployeeDelete = async (employeeId: undefined | number | null) => {
 		refForm.value?.validate().then(async (res) => {
 			if (res.valid) {
 				if (access_token) {
-					const response = await axios.delete(`employee/${employeeId}`, {
-						headers: {
-							Authorization: `Bearer ${access_token}`
-						},
-						params: {
-							deleteType: deleteTypeRef.value
+					const response = await axios.delete(
+						`companies/employees/${employeeId}`,
+						{
+							headers: {
+								Authorization: `Bearer ${access_token}`
+							},
+							params: {
+								deleteType: deleteTypeRef.value
+							}
 						}
-					})
+					)
 					if (response) {
 						// if delete is success full recall the companies list and show toast message
 						if (aStore.userRole === 'admin') {

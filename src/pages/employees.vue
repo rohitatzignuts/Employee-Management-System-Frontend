@@ -4,6 +4,7 @@ import { useEmployeesStore } from '@/store/useEmployeesStore'
 import { VDataTable } from 'vuetify/labs/VDataTable'
 import AddNewEmployeeDrawer from '@/demos/forms/AddNewEmployeeDrawer.vue'
 import DeleteEmployeeDialogBasic from '@/demos/forms/DeleteEmployeeDialogBasic.vue'
+import { useCompanyStore } from '@/store/useCompanyStore'
 import { useAuthStore } from '@/store/useAuthStore'
 import { storeToRefs } from 'pinia'
 
@@ -12,25 +13,49 @@ const isAddNewUserDrawerVisible = ref<boolean>(false)
 const employeeEditid = ref<number | undefined | null>(null)
 const employeeDeleteid = ref<number | undefined | null>(null)
 const deleteCompanyDialog = ref<boolean>(false)
-const searchQuery = ref<string>('')
 const selectedRole = ref<string>()
+const selectedCompany = ref<string>()
+const searchQuery = ref<string>('')
 
 // constants
 const store = useEmployeesStore()
 const { employees, cmpEmployees } = storeToRefs(store)
 const { getAllEmployees, getCompanyEmployees, storedCmpName } = store
 const aStore = useAuthStore()
+const cmpStore = useCompanyStore()
+const { registeredCompanies } = storeToRefs(cmpStore)
+const { getAllRegisteredCompanies } = cmpStore
 const { userRole } = aStore
-const status = ['cmp_admin', 'employee']
 
 const headers = [
-	{ title: 'NAME', key: 'first_name' },
-	{ title: 'EMAIL', key: 'email' },
-	{ title: 'COMPANY', key: 'company_name' },
-	{ title: 'EMP NUMBER', key: 'emp_number' },
-	{ title: 'ROLE', key: 'role' },
-	{ title: 'JOINING DATE', key: 'joining_date' },
-	{ title: 'Actions', key: 'actions' }
+	{
+		title: 'NAME',
+		key: 'first_name'
+	},
+	{
+		title: 'EMAIL',
+		key: 'email'
+	},
+	{
+		title: 'COMPANY',
+		key: 'company.name'
+	},
+	{
+		title: 'EMP NUMBER',
+		key: 'emp_number'
+	},
+	{
+		title: 'ROLE',
+		key: 'role'
+	},
+	{
+		title: 'JOINING DATE',
+		key: 'joining_date'
+	},
+	{
+		title: 'Actions',
+		key: 'actions'
+	}
 ]
 
 // when dialog is closed clear employeeEditid and recall the employees list
@@ -39,9 +64,7 @@ const dialogClose = (e: any) => {
 	employeeEditid.value = null
 	// only call the api if user has performed any actions
 	if (e) {
-		if (userRole === 'admin') {
-			getAllEmployees()
-		} else {
+		if (userRole !== 'admin') {
 			getCompanyEmployees()
 		}
 	}
@@ -66,23 +89,27 @@ const handleEmployeeDelete = (employeeId: number) => {
 }
 
 // handle employee search by name
+const handleSelectCompany = () => {
+	getAllEmployees(selectedCompany.value)
+}
+
+// handle employee search by name
 const handleSearch = useDebounceFn(() => {
-	if (userRole === 'admin') {
-		getAllEmployees(searchQuery.value, selectedRole.value)
-	} else {
-		getCompanyEmployees(searchQuery.value)
-	}
+	getCompanyEmployees(searchQuery.value)
 }, 500)
 
 // recall the handleSearch() when select item changes
-watch(selectedRole, async (newSelectedRole, oldSelectedRole) => {
-	handleSearch()
-})
+watch(
+	[selectedRole, selectedCompany],
+	async (newSelectedRole, oldSelectedRole) => {
+		handleSelectCompany()
+	}
+)
 
 // list all the employees when the component first mounts
 onMounted(() => {
 	if (userRole === 'admin') {
-		getAllEmployees()
+		getAllRegisteredCompanies()
 	} else {
 		getCompanyEmployees()
 	}
@@ -102,25 +129,30 @@ onMounted(() => {
 		<!-- 👉 Search and filter -->
 		<VRow class="my-2">
 			<!-- 👉 search bar to search employee by his/her name -->
-			<VCol :cols="userRole === 'admin' ? 8 : 12">
-				<div class="invoice-list-search">
-					<AppTextField
-						v-model="searchQuery"
-						density="compact"
-						prepend-inner-icon="tabler-search"
-						placeholder="Search By First Name"
-						@input="handleSearch"
-					/>
-				</div>
+			<VCol v-if="userRole === 'admin'">
+				<p>**Select company to view records</p>
+				<VRow>
+					<VCol cols="12">
+						<div class="d-flex align-center gap-2 justify-content-between">
+							<AppSelect
+								v-model="selectedCompany"
+								:items="registeredCompanies"
+								clearable
+								placeholder="Company"
+							>
+							</AppSelect>
+						</div>
+					</VCol>
+				</VRow>
 			</VCol>
-			<!-- 👉 select menu to select employees role -->
-			<VCol cols="4" v-if="userRole === 'admin'">
-				<AppSelect
-					v-model="selectedRole"
-					:items="status"
-					clearable
-					placeholder="Role"
-				></AppSelect>
+			<VCol v-else>
+				<AppTextField
+					v-model="searchQuery"
+					density="compact"
+					prepend-inner-icon="tabler-search"
+					placeholder="Search By First Name ( min 3 chars)"
+					@input="handleSearch"
+				/>
 			</VCol>
 		</VRow>
 

@@ -6,6 +6,7 @@ export const useCompanyStore = defineStore('companies', () => {
 	const companies = ref<Array<Object>>([])
 	const access_token = localStorage.getItem('access_token')
 	const registeredCompanies = ref<Array<string>>([])
+	const uniqueJobCompanies = ref<Array<string>>([])
 
 	// get all the companys from the database
 	const getAllCompanies = async (
@@ -39,7 +40,12 @@ export const useCompanyStore = defineStore('companies', () => {
 	const getAllRegisteredCompanies = async () => {
 		try {
 			const response = await axios.get('registeredCompanies')
-			registeredCompanies.value = Array.from(new Set(response.data.data))
+			registeredCompanies.value = Array.from(
+				new Set(response.data.data.allCompanies)
+			)
+			uniqueJobCompanies.value = Array.from(
+				new Set(response.data.data.uniqueJobCompanies)
+			)
 		} catch (error: any) {
 			console.log(error)
 		}
@@ -51,6 +57,7 @@ export const useCompanyStore = defineStore('companies', () => {
 		totalCompanies,
 		isLoading,
 		companies,
-		registeredCompanies
+		registeredCompanies,
+		uniqueJobCompanies
 	}
 })

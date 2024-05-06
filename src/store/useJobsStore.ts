@@ -42,14 +42,14 @@ export const useJobsStore = defineStore('jobs', () => {
 	const getJobsByCompany = async (term: string | null = '') => {
 		const company_id = eStore.storedCmpId
 		try {
-			const response = await axios.get(
-				`${company_id}/jobs/search?term=${term}`,
-				{
-					headers: {
-						Authorization: `Bearer ${access_token}`
-					}
+			const response = await axios.get(`companies/${company_id}/jobs`, {
+				headers: {
+					Authorization: `Bearer ${access_token}`
+				},
+				params: {
+					term
 				}
-			)
+			})
 			totalJobsByCompanies.value = response.data.data ?? []
 			totalJobsCountByCompany.value = response.data.data?.length ?? 0
 		} catch (error: any) {
